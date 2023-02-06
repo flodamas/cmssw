@@ -18,10 +18,10 @@
 
 #include "DataFormats/HeavyIonEvent/interface/HFFilterInfo.h" //this line is needed to access the HF Filters
 
-class HFFilter : public edm::EDFilter {
+class HiHFFilter : public edm::EDFilter {
 public:
-  explicit HFFilter(const edm::ParameterSet &);
-  ~HFFilter() override;
+  explicit HiHFFilter(const edm::ParameterSet &);
+  ~HiHFFilter() override;
 
 private:
   bool filter(edm::Event &, const edm::EventSetup &) override;
@@ -38,16 +38,16 @@ private:
 using namespace edm;
 using namespace std;
 
-HFFilter::HFFilter(const edm::ParameterSet& iConfig) {
+HiHFFilter::HiHFFilter(const edm::ParameterSet& iConfig) {
   HFfilters_ = consumes<reco::HFFilterInfo>(iConfig.getParameter<edm::InputTag>("HFfilters"));
   //  applyfilter_ = iConfig.getParameter<bool>("applyfilter");
   threshold_ = iConfig.getParameter<int>("threshold");
   minnumtowers_ = iConfig.getParameter<int>("minnumtowers");
 }
 
-HFFilter::~HFFilter() {}
+HiHFFilter::~HiHFFilter() {}
 
-bool HFFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+bool HiHFFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   bool accepted = false;
 
@@ -68,4 +68,4 @@ bool HFFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(HFFilter);
+DEFINE_FWK_MODULE(HiHFFilter);

@@ -68,10 +68,10 @@ options.inputFiles =[
   #'file:/afs/cern.ch/user/a/anstahll/work/MiniAOD/OniaTree/TRY2/CMSSW_10_3_3_patch1/src/reMiniAOD_DATA_PAT_JPsi.root',
   #'/store/hidata/HIRun2018A/HIDoubleMuon/AOD/04Apr2019-v1/310001/FED19720-0CE4-5B4D-91E0-DB230A5046EB.root'
   #'/store/hidata/HIRun2018A/HIDoubleMuon/AOD/PromptReco-v1/000/326/859/00000/9D9FEF75-B31A-9645-9090-0F99D895AED9.root'
-  #'/store/hidata/HIRun2018A/HIDoubleMuon/MINIAOD/PbPb18_MiniAODv1-v1/120000/00137f14-f84b-4f1b-ad37-0717a01c981b.root'
-  '/store/hidata/HIRun2018A/HIMinimumBias2/MINIAOD/PbPb18_MiniAODv1-v1/120000/001d624b-c9ef-4516-96fe-680f903b16bf.root'
+  '/store/hidata/HIRun2018A/HIDoubleMuon/MINIAOD/PbPb18_MiniAODv1-v1/120000/00137f14-f84b-4f1b-ad37-0717a01c981b.root'
+  #'/store/hidata/HIRun2018A/HIMinimumBias2/MINIAOD/PbPb18_MiniAODv1-v1/120000/001d624b-c9ef-4516-96fe-680f903b16bf.root'
 ]
-options.maxEvents = -1 # -1 means all events
+options.maxEvents = 100 #-1 # -1 means all events
 
 # Get and parse the command line arguments
 options.parseArguments()

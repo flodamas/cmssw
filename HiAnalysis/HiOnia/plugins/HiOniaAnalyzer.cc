@@ -235,6 +235,7 @@ private:
   Short_t Gen_3mu_whichRec
       [Max_Bc_size];  // index of the reconstructed trimuon that was matched with this gen visible Bc. Is -1 if one muon of the Bc was not reconstructed
 
+  int Gen_mu_momId[Max_mu_size];       // pdg Id of the muon's parent IF THERE IS GEN INFO
   Short_t Gen_mu_size;                 // number of generated muons
   Short_t Gen_mu_charge[Max_mu_size];  // muon charge
   Short_t Gen_mu_type[Max_mu_size];    // muon type: prompt, non-prompt, unmatched
@@ -341,8 +342,7 @@ private:
   bool Reco_mu_isSoftCutBased[Max_mu_size];
   bool Reco_mu_isSoftMVAId[Max_mu_size];
   bool Reco_mu_isHybridSoft[Max_mu_size];
-  Short_t Reco_mu_candType
-      [Max_mu_size];  // candidate type of muon. 0 (or not present): muon collection, 1: packedPFCandidate, 2: lostTrack collection
+  Short_t Reco_mu_candType[Max_mu_size];  // candidate type of muon. 0 (or not present): muon collection, 1: packedPFCandidate, 2: lostTrack collection
   bool Reco_mu_InTightAcc[Max_mu_size];  // Is in the tight acceptance for global muons
   bool Reco_mu_InLooseAcc[Max_mu_size];  // Is in the loose acceptance for global muons
 
@@ -2886,9 +2886,16 @@ void HiOniaAnalyzer::fillGenInfo() {
          ++it) {
       const reco::GenParticle* gen = &(*it);
 
+
       if (abs(gen->pdgId()) == 13 && (gen->status() == 1)) {
         Gen_mu_type[Gen_mu_size] = _isPromptMC ? 0 : 1;  // prompt: 0, non-prompt: 1
         Gen_mu_charge[Gen_mu_size] = gen->charge();
+	
+        std::pair<std::vector<reco::GenParticleRef>, std::pair<float, float> > MCinfo = findGenMCInfo(gen);
+	if (_genealogyInfo) {
+            _Gen_QQ_MomAndTrkBro[Gen_mu_size] = MCinfo.first;
+            Gen_mu_momId[Gen_mu_size] = _Gen_QQ_MomAndTrkBro[Gen_mu_size][0]->pdgId();
+        }
 
         TLorentzVector vMuon = lorentzMomentum(gen->p4());
         new ((*Gen_mu_4mom)[Gen_mu_size]) TLorentzVector(vMuon);
@@ -3723,8 +3730,10 @@ void HiOniaAnalyzer::InitTree() {
         myTree->Branch("Gen_3mu_whichRec", Gen_3mu_whichRec, "Gen_3mu_whichRec[Gen_Bc_size]/S");
       }
     }
+    
 
     myTree->Branch("Gen_mu_size", &Gen_mu_size, "Gen_mu_size/S");
+    myTree->Branch("Gen_mu_momId", Gen_mu_momId, "Gen_mu_momId[Gen_mu_size]/I");
     //myTree->Branch("Gen_mu_type",   Gen_mu_type,   "Gen_mu_type[Gen_mu_size]/S");
     myTree->Branch("Gen_mu_charge", Gen_mu_charge, "Gen_mu_charge[Gen_mu_size]/S");
     myTree->Branch("Gen_mu_4mom", "TClonesArray", &Gen_mu_4mom, 32000, 0);

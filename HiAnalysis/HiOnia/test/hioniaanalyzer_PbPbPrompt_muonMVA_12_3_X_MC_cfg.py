@@ -9,7 +9,7 @@ from Configuration.StandardSequences.Eras import eras
 HLTProcess     = "HLT" # Name of HLT process
 isMC           = True # if input is MONTECARLO: True or if it's DATA: False
 muonSelection  = "All" # Single muon selection: All, Glb(isGlobal), GlbTrk(isGlobal&&isTracker), Trk(isTracker), GlbOrTrk, TwoGlbAmongThree (which requires two isGlobal for a trimuon, and one isGlobal for a dimuon) are available
-applyEventSel  = True # Only apply Event Selection if the required collections are present
+applyEventSel  = False # Only apply Event Selection if the required collections are present
 OnlySoftMuons  = False # Keep only isSoftMuon's (without highPurity, and without isGlobal which should be put in 'muonSelection' parameter) from the beginning of HiSkim. If you want the full SoftMuon selection, set this flag false and add 'isSoftMuon' in lowerPuritySelection. In any case, if applyCuts=True, isSoftMuon is required at HiAnalysis level for muons of selected dimuons.
 applyCuts      = False # At HiAnalysis level, apply kinematic acceptance cuts + identification cuts (isSoftMuon (without highPurity) or isTightMuon, depending on TightGlobalMuon flag) for muons from selected di(tri)muons + hard-coded cuts on the di(tri)muon that you would want to add (but recommended to add everything in LateDimuonSelection, applied at the end of HiSkim)
 SumETvariables = True  # Whether to write out SumET-related variables
@@ -59,7 +59,7 @@ options.inputFiles =[
   #'/store/himc/HINPbPbSpring21MiniAOD/JPsi_pThat-2_TuneCP5_HydjetDrumMB_5p02TeV_Pythia8/MINIAODSIM/mva98_112X_upgrade2018_realistic_HI_v9-v1/100000/016a5b9f-1cd9-442b-a856-c16a8a89e41a.root'
   '/store/user/soohwan/RECO_MC_JPsiEMB_pTHatMin2_CMSSW_12_3_0_220530_v1/HIN-HINPbPbAutumn18GSHIMix-00008_pTHatMin2_EMB_CMSSW_12_3_0/RECO_MC_JPsiEMB_pTHatMin2_CMSSW_12_3_0_220530_v1/220529_160133/0000/step3_RAW2DIGI_L1Reco_RECO_PAT_JPsiEMB_pTHatMin2_10.root'
 ]
-options.maxEvents = 100 # -1 means all events
+options.maxEvents = 300 # -1 means all events
 
 # Get and parse the command line arguments
 options.parseArguments()
@@ -177,7 +177,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globalTag, '')
 process.load("RecoHI.HiCentralityAlgos.CentralityBin_cfi")
 #process.centralityBin.Centrality = cms.InputTag("hiCentrality")
 #process.centralityBin.centralityVariable = cms.string("HFtowers")
-print('\n\033[31m~*~ USING CENTRALITY TABLE FOR PbPb 2018 ~*~\033[0m\n')
+#print('\n\033[31m~*~ USING CENTRALITY TABLE FOR PbPb 2018 ~*~\033[0m\n')
 process.GlobalTag.snapshotTime = cms.string("9999-12-31 23:59:59.000")
 process.GlobalTag.toGet.extend([
     cms.PSet(record = cms.string("HeavyIonRcd"),
@@ -215,7 +215,7 @@ process.hionia.applyCuts        = cms.bool(applyCuts)
 process.hionia.AtLeastOneCand   = cms.bool(atLeastOneCand)
 process.hionia.OneMatchedHLTMu  = cms.int32(OneMatchedHLTMu)
 process.hionia.checkTrigNames   = cms.bool(False)#change this to get the event-level trigger info in hStats output (but creates lots of warnings when fake trigger names are used)
-
+process.hionia.genealogyInfo    = cms.bool(True)
 '''
 #----------------------------------------------------------------------------
 

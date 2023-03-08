@@ -223,6 +223,7 @@ def changeToMiniAOD(process):
             triggerResults              = cms.InputTag('TriggerResults::HLT'),
             unpackFilterLabels          = cms.bool(True)
         )
+        
         process.patMuonsWithTriggerSequence.remove(process.patTriggerAll)
         process.load('HiAnalysis.HiOnia.unpackedTracksAndVertices_cfi')
         process.patMuonSequence.insert(0, process.unpackedTracksAndVertices)

@@ -14,7 +14,7 @@ namespace pat {
               consumes<pat::PackedCandidateCollection>(iConfig.getParameter<edm::InputTag>("packedPFCandidates"))),
           lostTrackToken_(consumes<pat::PackedCandidateCollection>(iConfig.getParameter<edm::InputTag>("lostTracks"))),
           packedPFCandidateNormChi2MapToken_(
-              consumes<edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("packedPFCandidateNormChi2Map"))),
+	     consumes<edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("packedPFCandidateNormChi2Map"))),
           lostTrackNormChi2MapToken_(
               consumes<edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("lostTrackNormChi2Map"))),
           primaryVertexToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("primaryVertices"))),
@@ -171,9 +171,9 @@ void pat::TrackAndVertexUnpacker::fillDescriptions(edm::ConfigurationDescription
       ->setComment("packed PF candidates collection");
   desc.add<edm::InputTag>("lostTracks", edm::InputTag("lostTracks"))->setComment("lost tracks collection");
   desc.add<edm::InputTag>("packedPFCandidateNormChi2Map", edm::InputTag("packedPFCandidateTrackChi2"))
-      ->setComment("packed PF candidates normChi2 map");
+    ->setComment("packed PF candidates normChi2 map");
   desc.add<edm::InputTag>("lostTrackNormChi2Map", edm::InputTag("lostTrackChi2"))
-      ->setComment("lost tracks normChi2 map");
+     ->setComment("lost tracks normChi2 map");
   desc.add<edm::InputTag>("primaryVertices", edm::InputTag("offlineSlimmedPrimaryVertices"))
       ->setComment("primary vertex collection");
   desc.add<edm::InputTag>("secondaryVertices", edm::InputTag("slimmedSecondaryVertices"))

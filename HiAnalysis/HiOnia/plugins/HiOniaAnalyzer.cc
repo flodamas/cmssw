@@ -214,7 +214,7 @@ private:
   float Gen_weight;  // generator weight
   float Gen_pthat;   // ptHat scale of generated hard scattering
 
-  Short_t Gen_QQ_size;               // number of generated Onia
+  int Gen_QQ_size;               // number of generated Onia
   Short_t Gen_QQ_type[Max_QQ_size];  // Onia type: prompt, non-prompt, unmatched
   float Gen_QQ_ctau[Max_QQ_size];    // ctau: flight time
   float Gen_QQ_ctau3D[Max_QQ_size];  // ctau3D: 3D flight time
@@ -227,7 +227,7 @@ private:
       [Max_QQ_size];  // index of the reconstructed Jpsi that was matched with this gen Jpsi. Is -1 if one of the 2 muons from Jpsi was not reconstructed. Is -2 if the two muons were reconstructed, but the dimuon was not selected
   Short_t Gen_QQ_Bc_idx[Max_QQ_size];  //Index of the Bc gen mother. -1 if there is no Bc mother
 
-  Short_t Gen_Bc_size;                  // number of generated Bc
+  int Gen_Bc_size;                  // number of generated Bc
   float Gen_Bc_ctau[Max_Bc_size];       // ctau: flight time
   int Gen_Bc_pdgId[Max_Bc_size];        // pdgId of Bc
   Short_t Gen_Bc_QQ_idx[Max_Bc_size];   //Points to the number of the associated Jpsi daughter
@@ -235,15 +235,16 @@ private:
   Short_t Gen_3mu_whichRec
       [Max_Bc_size];  // index of the reconstructed trimuon that was matched with this gen visible Bc. Is -1 if one muon of the Bc was not reconstructed
 
+  std::vector<int> Gen_mu_Id; // we never know
   int Gen_mu_momId[Max_mu_size];       // pdg Id of the muon's parent IF THERE IS GEN INFO
-  Short_t Gen_mu_size;                 // number of generated muons
+  int Gen_mu_size;                 // number of generated muons
   Short_t Gen_mu_charge[Max_mu_size];  // muon charge
   Short_t Gen_mu_type[Max_mu_size];    // muon type: prompt, non-prompt, unmatched
   Short_t Gen_mu_whichRec
       [Max_mu_size];  // index of the reconstructed muon that was matched with this gen muon. Is -1 if the muon was not reconstructed
   float Gen_mu_MatchDeltaR[Max_mu_size];  // deltaR between reco and gen matched muons
 
-  Short_t Reco_3mu_size;  // Number of reconstructed trimuons
+  int Reco_3mu_size;  // Number of reconstructed trimuons
   Short_t Reco_3mu_charge[Max_Bc_size];
   Short_t Reco_3mu_mupl_idx[Max_Bc_size];  // index of the muon plus from Jpsi, in the full list of muons
   Short_t Reco_3mu_mumi_idx[Max_Bc_size];  // index of the muon minus from Jpsi, in the full list of muons
@@ -286,7 +287,7 @@ private:
   float Reco_3mu_mupl_dxy[Max_Bc_size];
   float Reco_3mu_mupl_dz[Max_Bc_size];
 
-  Short_t Reco_QQ_size;                   // Number of reconstructed Onia
+  int Reco_QQ_size;                   // Number of reconstructed Onia
   Short_t Reco_QQ_type[Max_QQ_size];      // Onia category: GG, GT, TT
   Short_t Reco_QQ_sign[Max_QQ_size];      /* Mu Mu combinations sign:
                              0 = +/- (signal)
@@ -298,7 +299,6 @@ private:
   Short_t Reco_QQ_whichGen
       [Max_QQ_size];  // index of the generated Jpsi that was matched with this rec Jpsi. Is -1 if one of the 2 muons from Jpsi was not reconstructed
   ULong64_t Reco_QQ_trig[Max_QQ_size];  // Vector of trigger bits matched to the Onia
-  bool Reco_QQ_isCowboy[Max_mu_size];   // Cowboy/Sailor Flag
   float Reco_QQ_VtxProb[Max_QQ_size];   // chi2 probability of vertex fitting
   float Reco_QQ_ctau[Max_QQ_size];      // ctau: flight time
   float Reco_QQ_ctauErr[Max_QQ_size];   // error on ctau
@@ -325,7 +325,7 @@ private:
   float Reco_QQ_mumi_dz[Max_QQ_size];   // dz for minus inner track muons
   Short_t Reco_QQ_flipJpsi[Max_QQ_size];
 
-  Short_t Reco_mu_size;  // Number of reconstructed muons
+  int Reco_mu_size;  // Number of reconstructed muons
   int Reco_mu_SelectionType[Max_mu_size];
   ULong64_t Reco_mu_trig[Max_mu_size];  // Vector of trigger bits matched to the muon
   Short_t Reco_mu_charge[Max_mu_size];  // Vector of charge of muons
@@ -344,8 +344,7 @@ private:
   bool Reco_mu_isHybridSoft[Max_mu_size];
   Short_t Reco_mu_candType[Max_mu_size];  // candidate type of muon. 0 (or not present): muon collection, 1: packedPFCandidate, 2: lostTrack collection
   bool Reco_mu_isMedium[Max_mu_size];
-  Short_t Reco_mu_candType
-      [Max_mu_size];  // candidate type of muon. 0 (or not present): muon collection, 1: packedPFCandidate, 2: lostTrack collection
+  //Short_t Reco_mu_candType[Max_mu_size];  // candidate type of muon. 0 (or not present): muon collection, 1: packedPFCandidate, 2: lostTrack collection
   bool Reco_mu_InTightAcc[Max_mu_size];  // Is in the tight acceptance for global muons
   bool Reco_mu_InLooseAcc[Max_mu_size];  // Is in the loose acceptance for global muons
 
@@ -737,7 +736,7 @@ HiOniaAnalyzer::HiOniaAnalyzer(const edm::ParameterSet& iConfig)
     std::cout << " Will keep only dimuons (trimuons) that have one (two) daughters matched to "
               << HLTLastFilters[_OneMatchedHLTMu] << " filter." << std::endl;
 
-  etaMax = 2.5;
+  etaMax = 3.0;
 
   JpsiMassMin = 2.6;
   JpsiMassMax = 3.5;
@@ -1238,11 +1237,6 @@ void HiOniaAnalyzer::fillTreeJpsi(int count) {
         Reco_QQ_mupl_idx[Reco_QQ_size] = IndexOfThisMuon(&vMuon1);  //needs the non-flipped muon momentum
         Reco_QQ_mumi_idx[Reco_QQ_size] = IndexOfThisMuon(&vMuon2);
 
-        if (TVector2::Phi_mpi_pi(vMuon1.Phi() - vMuon2.Phi()) > 0)
-          Reco_QQ_isCowboy[Reco_QQ_size] = true;
-        else
-          Reco_QQ_isCowboy[Reco_QQ_size] = false;
-
         if (_flipJpsiDirection > 0) {
           iTrack_mupl = mu1Trk;
           iTrack_mumi = mu2Trk;
@@ -1257,11 +1251,6 @@ void HiOniaAnalyzer::fillTreeJpsi(int count) {
       } else {
         Reco_QQ_mupl_idx[Reco_QQ_size] = IndexOfThisMuon(&vMuon2);  //needs the non-flipped muon momentum
         Reco_QQ_mumi_idx[Reco_QQ_size] = IndexOfThisMuon(&vMuon1);
-
-        if (TVector2::Phi_mpi_pi(vMuon2.Phi() - vMuon1.Phi()) > 0)
-          Reco_QQ_isCowboy[Reco_QQ_size] = true;
-        else
-          Reco_QQ_isCowboy[Reco_QQ_size] = false;
 
         if (_flipJpsiDirection > 0) {
           iTrack_mupl = mu2Trk;
@@ -2716,7 +2705,7 @@ void HiOniaAnalyzer::InitEvent() {
 
     Gen_QQ_size = 0;
     Gen_mu_size = 0;
-
+    Gen_mu_Id.clear();
     Gen_weight = -1.;
     Gen_pthat = -1.;
 
@@ -2894,7 +2883,7 @@ void HiOniaAnalyzer::fillGenInfo() {
     for (std::vector<reco::GenParticle>::const_iterator it = collGenParticles->begin(); it != collGenParticles->end();
          ++it) {
       const reco::GenParticle* gen = &(*it);
-
+      if(gen->status()==1)Gen_mu_Id.push_back(gen->pdgId());
 
       if (abs(gen->pdgId()) == 13 && (gen->status() == 1)) {
         Gen_mu_type[Gen_mu_size] = _isPromptMC ? 0 : 1;  // prompt: 0, non-prompt: 1
@@ -3528,7 +3517,7 @@ void HiOniaAnalyzer::InitTree() {
 
   if (!_onlySingleMuons) {
     if (_doTrimuons || _doDimuTrk) {
-      myTree->Branch("Reco_3mu_size", &Reco_3mu_size, "Reco_3mu_size/S");
+      myTree->Branch("Reco_3mu_size", &Reco_3mu_size, "Reco_3mu_size/I");
       myTree->Branch("Reco_3mu_charge", Reco_3mu_charge, "Reco_3mu_charge[Reco_3mu_size]/S");
       myTree->Branch("Reco_3mu_4mom", "TClonesArray", &Reco_3mu_4mom, 32000, 0);
       myTree->Branch("Reco_3mu_mupl_idx", Reco_3mu_mupl_idx, "Reco_3mu_mupl_idx[Reco_3mu_size]/S");
@@ -3590,7 +3579,7 @@ void HiOniaAnalyzer::InitTree() {
       myTree->Branch("Reco_3mu_vtx", "TClonesArray", &Reco_3mu_vtx, 32000, 0);
     }
 
-    myTree->Branch("Reco_QQ_size", &Reco_QQ_size, "Reco_QQ_size/S");
+    myTree->Branch("Reco_QQ_size", &Reco_QQ_size, "Reco_QQ_size/I");
     myTree->Branch("Reco_QQ_type", Reco_QQ_type, "Reco_QQ_type[Reco_QQ_size]/S");
     myTree->Branch("Reco_QQ_sign", Reco_QQ_sign, "Reco_QQ_sign[Reco_QQ_size]/S");
     myTree->Branch("Reco_QQ_4mom", "TClonesArray", &Reco_QQ_4mom, 32000, 0);
@@ -3598,7 +3587,6 @@ void HiOniaAnalyzer::InitTree() {
     myTree->Branch("Reco_QQ_mumi_idx", Reco_QQ_mumi_idx, "Reco_QQ_mumi_idx[Reco_QQ_size]/S");
 
     myTree->Branch("Reco_QQ_trig", Reco_QQ_trig, "Reco_QQ_trig[Reco_QQ_size]/l");
-    myTree->Branch("Reco_QQ_isCowboy", Reco_QQ_isCowboy, "Reco_QQ_isCowboy[Reco_QQ_size]/O");
     myTree->Branch("Reco_QQ_ctau", Reco_QQ_ctau, "Reco_QQ_ctau[Reco_QQ_size]/F");
     myTree->Branch("Reco_QQ_ctauErr", Reco_QQ_ctauErr, "Reco_QQ_ctauErr[Reco_QQ_size]/F");
     myTree->Branch("Reco_QQ_cosAlpha", Reco_QQ_cosAlpha, "Reco_QQ_cosAlpha[Reco_QQ_size]/F");
@@ -3627,7 +3615,7 @@ void HiOniaAnalyzer::InitTree() {
     }
   }
 
-  myTree->Branch("Reco_mu_size", &Reco_mu_size, "Reco_mu_size/S");
+  myTree->Branch("Reco_mu_size", &Reco_mu_size, "Reco_mu_size/I");
   myTree->Branch("Reco_mu_type", Reco_mu_type, "Reco_mu_type[Reco_mu_size]/S");
   if (_isMC) {
     myTree->Branch("Reco_mu_whichGen", Reco_mu_whichGen, "Reco_mu_whichGen[Reco_mu_size]/S");
@@ -3720,7 +3708,7 @@ void HiOniaAnalyzer::InitTree() {
     myTree->Branch("Gen_pthat", &Gen_pthat, "Gen_pthat/F");
 
     if (!_onlySingleMuons) {
-      myTree->Branch("Gen_QQ_size", &Gen_QQ_size, "Gen_QQ_size/S");
+      myTree->Branch("Gen_QQ_size", &Gen_QQ_size, "Gen_QQ_size/I");
       //myTree->Branch("Gen_QQ_type",      Gen_QQ_type,    "Gen_QQ_type[Gen_QQ_size]/S");
       myTree->Branch("Gen_QQ_4mom", "TClonesArray", &Gen_QQ_4mom, 32000, 0);
       myTree->Branch("Gen_QQ_ctau", Gen_QQ_ctau, "Gen_QQ_ctau[Gen_QQ_size]/F");
@@ -3734,7 +3722,7 @@ void HiOniaAnalyzer::InitTree() {
 
       if (_doTrimuons || _doDimuTrk) {
         myTree->Branch("Gen_QQ_Bc_idx", Gen_QQ_Bc_idx, "Gen_QQ_Bc_idx[Gen_QQ_size]/S");
-        myTree->Branch("Gen_Bc_size", &Gen_Bc_size, "Gen_Bc_size/S");
+        myTree->Branch("Gen_Bc_size", &Gen_Bc_size, "Gen_Bc_size/I");
         myTree->Branch("Gen_Bc_4mom", "TClonesArray", &Gen_Bc_4mom, 32000, 0);
         myTree->Branch("Gen_Bc_nuW_4mom", "TClonesArray", &Gen_Bc_nuW_4mom, 32000, 0);
         myTree->Branch("Gen_Bc_QQ_idx", Gen_Bc_QQ_idx, "Gen_Bc_QQ_idx[Gen_Bc_size]/S");
@@ -3747,8 +3735,8 @@ void HiOniaAnalyzer::InitTree() {
       }
     }
     
-
-    myTree->Branch("Gen_mu_size", &Gen_mu_size, "Gen_mu_size/S");
+    myTree->Branch("Gen_mu_Id", &Gen_mu_Id);
+    myTree->Branch("Gen_mu_size", &Gen_mu_size, "Gen_mu_size/I");
     myTree->Branch("Gen_mu_momId", Gen_mu_momId, "Gen_mu_momId[Gen_mu_size]/I");
     //myTree->Branch("Gen_mu_type",   Gen_mu_type,   "Gen_mu_type[Gen_mu_size]/S");
     myTree->Branch("Gen_mu_charge", Gen_mu_charge, "Gen_mu_charge[Gen_mu_size]/S");

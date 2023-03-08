@@ -44,7 +44,8 @@ void pat::EmbedMCinMuons::produce(edm::StreamID, edm::Event& iEvent, const edm::
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void pat::EmbedMCinMuons::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("muons", edm::InputTag("unpackedMuons"))->setComment("muon input collection");
+  desc.add<edm::InputTag>("muons", edm::InputTag("unpackedMuons"))
+    ->setComment("muon input collection");
   desc.add<edm::InputTag>("matchedGen", edm::InputTag("muonMatch"))
       ->setComment("matches with gen muons input collection");
   descriptions.add("unpackedMuonsWithGenMatch", desc);

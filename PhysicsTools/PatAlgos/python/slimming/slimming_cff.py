@@ -30,6 +30,11 @@ from RecoEgamma.EgammaPhotonProducers.reducedEgamma_cfi  import *
 from RecoLuminosity.LumiProducer.bunchSpacingProducer_cfi import bunchSpacingProducer
 from HeavyFlavorAnalysis.Onia2MuMu.OniaPhotonConversionProducer_cfi import PhotonCandidates as oniaPhotonCandidates
 from RecoLocalCalo.HcalRecProducers.HcalHitSelection_cfi import *
+from PhysicsTools.PatAlgos.packedCandidateMuonID_cfi import packedCandidateMuonID
+from PhysicsTools.PatAlgos.packedPFCandidateTrackChi2_cfi import packedPFCandidateTrackChi2
+from RecoHI.HiCentralityAlgos.CentralityBin_cfi import centralityBin
+from RecoHI.HiCentralityAlgos.hiHFfilters_cfi import hiHFfilters
+lostTrackChi2 = packedPFCandidateTrackChi2.clone(candidates = "lostTracks", doLostTracks = True)
 
 slimmingTask = cms.Task(
     packedPFCandidatesTask,
@@ -63,7 +68,12 @@ slimmingTask = cms.Task(
     reducedEgamma,
     slimmedHcalRecHits,
     bunchSpacingProducer,
-    oniaPhotonCandidates
+    oniaPhotonCandidates,
+    packedCandidateMuonID, # added by hand
+    packedPFCandidateTrackChi2, # added by hand
+    lostTrackChi2
+    #centralityBin,
+    #hiHFfilters
 )
 
 from Configuration.ProcessModifiers.pp_on_AA_cff import pp_on_AA
@@ -80,11 +90,10 @@ from RecoHI.HiEvtPlaneAlgos.HiEvtPlane_cfi import hiEvtPlane
 from RecoHI.HiEvtPlaneAlgos.hiEvtPlaneFlat_cfi import hiEvtPlaneFlat
 pp_on_AA.toReplaceWith(slimmingTask, cms.Task(slimmingTask.copy(), hiPixelTracks, hiEvtPlane, hiEvtPlaneFlat))
 
-from PhysicsTools.PatAlgos.packedCandidateMuonID_cfi import packedCandidateMuonID
-from PhysicsTools.PatAlgos.packedPFCandidateTrackChi2_cfi import packedPFCandidateTrackChi2
-from RecoHI.HiCentralityAlgos.CentralityBin_cfi import centralityBin
-from RecoHI.HiCentralityAlgos.hiHFfilters_cfi import hiHFfilters
-lostTrackChi2 = packedPFCandidateTrackChi2.clone(candidates = "lostTracks", doLostTracks = True)
+
+#from RecoHI.HiCentralityAlgos.CentralityBin_cfi import centralityBin
+#from RecoHI.HiCentralityAlgos.hiHFfilters_cfi import hiHFfilters
+#lostTrackChi2 = packedPFCandidateTrackChi2.clone(candidates = "lostTracks", doLostTracks = True)
 
 pp_on_AA.toReplaceWith(
     slimmingTask,

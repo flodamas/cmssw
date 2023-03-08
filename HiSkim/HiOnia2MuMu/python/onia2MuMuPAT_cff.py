@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 from PhysicsTools.PatAlgos.tools.helpers import *
 
-def onia2MuMuPAT(process, GlobalTag, MC=False, HLT='HLT', Filter=True, useL1Stage2=False, doTrimuons=False, DimuonTrk=False, flipJpsiDir=0):
+def onia2MuMuPAT(process, GlobalTag, MC=False, Filter=True, useL1Stage2=False, doTrimuons=False, DimuonTrk=False, flipJpsiDir=0):
     # Setup the process
     process.options = cms.untracked.PSet(
         wantSummary = cms.untracked.bool(True),
@@ -40,7 +40,7 @@ def onia2MuMuPAT(process, GlobalTag, MC=False, HLT='HLT', Filter=True, useL1Stag
         process.muonMatch.resolveByMatchQuality = True
         process.muonMatch.matched = "genMuons"
         process.muonMatch.src = "muons"
-    changeTriggerProcessName(process, HLT)
+    changeTriggerProcessName(process, 'HLT')
     switchOffAmbiguityResolution(process) # Switch off ambiguity resolution: allow multiple reco muons to match to the same trigger muon
     addHLTL1Passthrough(process)
 
@@ -195,15 +195,11 @@ def onia2MuMuPAT(process, GlobalTag, MC=False, HLT='HLT', Filter=True, useL1Stag
             'keep *_inclusiveSecondaryVerticesLoose_*_*',      # Secondary vertices: to check if non-prompt muons come from a common SV
             'keep *_inclusiveCandidateSecondaryVertices_*_*',      # Secondary vertices: to check if non-prompt muons come from a common SV
             'keep *_offlineBeamSpot_*_*',                          # Beam spot: you want this for the same reason
-            'keep edmTriggerResults_TriggerResults_*_*',           # HLT info, per path (cheap)
             'keep *_hltGmtStage2Digis_*_*',                        # Stage2 L1 Muon info
             'keep *_gmtStage2Digis_*_*',                           # Stage2 L1 Muon info
             'keep *_hltGtStage2Digis_*_*',                         # Stage2 L1 Muon info
             'keep *_gtStage2Digis_*_*',                            # Stage2 L1 Muon info
             'keep *_hltGtStage2ObjectMap_*_*',                     # Stage2 L1 Muon info
-            'keep L1GlobalTriggerReadoutRecord_*_*_*',             # For HLT and L1 prescales (cheap)
-            'keep L1GlobalTriggerRecord_*_*_*',                    # For HLT and L1 prescales (cheap)
-            'keep L1GtTriggerMenu_*_*_*',                          # L1 prescales
             'keep *_centralityBin_*_*',                            # PA Centrality
             'keep *_hiCentrality_*_*',                             # PA Centrality
             'keep *_pACentrality_*_*',                             # PA Centrality

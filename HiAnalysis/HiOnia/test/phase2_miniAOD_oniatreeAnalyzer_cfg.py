@@ -4,7 +4,6 @@ from Configuration.StandardSequences.Eras import eras
 
 #----------------------------------------------------------------------------
 
-HLTProcess     = "HLT" # Name of HLT process
 isMC           = True # if input is MONTECARLO: True or if it's DATA: False
 muonSelection  = "All" # Single muon selection: All, Glb(isGlobal), GlbTrk(isGlobal&&isTracker), Trk(isTracker), GlbOrTrk, TwoGlbAmongThree (which requires two isGlobal for a trimuon, and one isGlobal for a dimuon) are available
 applyEventSel  = False # Only apply Event Selection if the required collections are present
@@ -15,12 +14,10 @@ SofterSgMuAcceptance = True # Whether to accept muons with a softer acceptance c
 doTrimuons     = False # Make collections of trimuon candidates in addition to dimuons, and keep only events with >0 trimuons (if atLeastOneCand)
 doDimuonTrk    = False # Make collections of Jpsi+track candidates in addition to dimuons
 atLeastOneCand = False # Keep only events that have one selected dimuon (or at least one trimuon if doTrimuons = true). BEWARE this can cause trouble in .root output if no event is selected by onia2MuMuPatGlbGlbFilter!
-OneMatchedHLTMu = -1   # Keep only di(tri)muons of which the one(two) muon(s) are matched to the HLT Filter of this number. You can get the desired number in the output of oniaTree. Set to -1 for no matching.
 #############################################################################
 keepExtraColl  = False # General Tracks + Stand Alone Muons + Converted Photon collections
 miniAOD        = True # whether the input file is in miniAOD format (default is AOD)
 miniAOD_muonCuts = False # Apply the cuts used in the muon collections of miniAOD. Only has an effect with AOD.
-UsePropToMuonSt = True # whether to use L1 propagated muons (works only for miniAOD now)
 
 #----------------------------------------------------------------------------
 
@@ -47,11 +44,7 @@ options = VarParsing.VarParsing ('analysis')
 options.outputFile = "Oniatree123X_Phase2_miniAOD_geoD84.root"
 options.secondaryOutputFile = "Jpsi_DataSet.root"
 options.inputFiles =[
-  #'/store/himc/HINPbPbAutumn18DR/JPsi_pThat-2_TuneCP5_HydjetDrumMB_5p02TeV_Pythia8/AODSIM/mva98_103X_upgrade2018_realistic_HI_v11-v1/120000/06BA15D4-3041-D54E-AB6D-F32A05C95948.root'
-  #'/store/user/jaebeom/SingleMuGun_Pt_3_100_HydjetEmb_RECO_Run3Cond_CMSSW_11_3_2_v2/SingleMuGun_Pt_3_100_HydjetEmb_Run3Cond_100k_CMSSW_11_3_2_v1/SingleMuGun_Pt_3_100_HydjetEmb_RECO_Run3Cond_CMSSW_11_3_2_v2/210729_035711/0000/SingleMuPt_3_100_pythia8_RECO_PU_1.root'
-  #'/store/group/phys_heavyions/MTD/RECO_JpsiMuMu_5p02TeV_TuneCP5_MTD_cmssw1210mtd_06302022v1/220724_223559/0000/step3_1.root'
-  #'/eos/user/f/fdamas/Phase2/Muons_12_2_X/JpsiMuMu_pp5p5TeV_Phase2_2M_GEN-SIM/JpsiMuMu_pp5p5TeV_Phase2_RECO_modifiedMiniAOD/230222_140713/0000/step3_10.root'
-  'file:/home/llr/cms/fdamas/step3_geoD84.root'
+  'file:/home/llr/cms/fdamas/CMSSW/CMSSW_12_1_0/src/geoD84/step3.root'
 ]
 options.maxEvents = -1 # -1 means all events
 
@@ -59,97 +52,6 @@ SkipEvent = cms.untracked.vstring('unpackedTracksAndVertices')
 
 # Get and parse the command line arguments
 options.parseArguments()
-
-triggerList    = {
-		# Double Muon Trigger List
-		'DoubleMuonTrigger' : cms.vstring(
-			"HLT_HIL1DoubleMuOpen_v1",#0
-			"HLT_HIL1DoubleMuOpen_OS_Centrality_40_100_v1", #1
-			"HLT_HIL1DoubleMuOpen_Centrality_50_100_v1", #2
-			"HLT_HIL1DoubleMu10_v1", #3
-			"HLT_HIL2_L1DoubleMu10_v1",#4
-			"HLT_HIL3_L1DoubleMu10_v1", #5
-			"HLT_HIL2DoubleMuOpen_v1", #6
-			"HLT_HIL3DoubleMuOpen_v1", #7
-			"HLT_HIL3DoubleMuOpen_M60120_v1", #8
-			"HLT_HIL3DoubleMuOpen_JpsiPsi_v1", #9
-			"HLT_HIL3DoubleMuOpen_Upsi_v1", #10
-			"HLT_HIL3Mu0_L2Mu0_v1", #11
-			"HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1",#12
-			"HLT_HIL3Mu2p5NHitQ10_L2Mu2_M7toinf_v1",#13
-                        "HLT_HIL3Mu3_L1TripleMuOpen_v1",#14
-                        "HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1_L1step",#15
-                        "HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1_L2step",#16
-                        "HLT_HIL3Mu0NHitQ10_L2Mu0_MAXdR3p5_M1to5_v1_L3step",#17
-                        ),
-		# Double Muon Filter List
-		'DoubleMuonFilter'  : cms.vstring(
-			"hltL1fL1sL1DoubleMuOpenL1Filtered0",
-			"hltL1fL1sL1DoubleMuOpenOSCentrality40100L1Filtered0",
-			"hltL1fL1sL1DoubleMuOpenCentrality50100L1Filtered0",
-			"hltL1fL1sL1DoubleMu10L1Filtered0",
-			"hltL2fL1sL1DoubleMu10L1f0L2Filtered0",
-			"hltDoubleMuOpenL1DoubleMu10Filtered",
-			"hltL2fL1sL1DoubleMuOpenL1f0L2Filtered0",
-			"hltL3fL1DoubleMuOpenL3Filtered0",
-			"hltL3fL1DoubleMuOpenL3FilteredM60120",
-			"hltL3fL1DoubleMuOpenL3FilteredPsi",
-			"hltL3fL1DoubleMuOpenL3FilteredUpsi",
-			"hltL3f0L3Mu0L2Mu0Filtered0",
-                        "hltL3f0L3Mu0L2Mu0DR3p5FilteredNHitQ10M1to5",
-			"hltL3f0L3Mu2p5NHitQ10L2Mu2FilteredM7toinf",
-                        "hltL3fL1sL1DoubleMuOpenL1fN3L2f0L3Filtered3",
-                        "hltL1fL1sL1DoubleMuOpenMAXdR3p5L1Filtered0",#L1 step for Jpsi trigger
-                        "hltL2fDoubleMuOpenL2DR3p5PreFiltered0",#L2 step
-                        "hltL3f0L3Mu0L2Mu0DR3p5FilteredNHitQ10M1to5"#"hltL3f0DR3p5L3FilteredNHitQ10"#L3 step
-			),
-                # Single Muon Trigger List
-                'SingleMuonTrigger' : cms.vstring(
-                        "HLT_HIL1MuOpen_Centrality_70_100_v1",
-                        "HLT_HIL1MuOpen_Centrality_80_100_v1",
-                        "HLT_HIL2Mu3_NHitQ15_v1",
-                        "HLT_HIL2Mu5_NHitQ15_v1",
-                        "HLT_HIL2Mu7_NHitQ15_v1",
-                        "HLT_HIL3Mu3_NHitQ10_v1",
-                        "HLT_HIL3Mu5_NHitQ10_v1",
-                        "HLT_HIL3Mu7_NHitQ10_v1",
-                        "HLT_HIL3Mu12_v1",
-                        "HLT_HIL3Mu15_v1",
-                        "HLT_HIL3Mu20_v1",
-                        "HLT_HIL2Mu3_NHitQ15_v2",
-                        "HLT_HIL2Mu5_NHitQ15_v2",
-                        "HLT_HIL2Mu7_NHitQ15_v2",
-                        "HLT_HIL3Mu3_NHitQ10_v2",
-                        "HLT_HIL3Mu5_NHitQ10_v2",
-                        "HLT_HIL3Mu7_NHitQ10_v2",
-                        "HLT_HIL3Mu12_v2",
-                        "HLT_HIL3Mu15_v2",
-                        "HLT_HIL3Mu20_v2",
-			),
-	        # Single Muon Filter List
-	        'SingleMuonFilter'  : cms.vstring(
-                        "hltL1fL1sL1MuOpenCentrality70100L1Filtered0",
-                        "hltL1fL1sL1MuOpenCentrality80100L1Filtered0",
-                        "hltL2fL1sMuOpenL1f0L2Filtered3NHitQ15",
-                        "hltL2fL1sMuOpenL1f0L2Filtered5NHitQ15",
-                        "hltL2fL1sMuOpenL1f0L2Filtered7NHitQ15",
-                        "hltL3fL1sL1SingleMuOpenL1f0L2f0L3Filtered3NHitQ10",
-                        "hltL3fL1sL1SingleMuOpenL1f0L2f0L3Filtered5NHitQ10",
-                        "hltL3fL1sL1SingleMuOpenL1f0L2f0L3Filtered7NHitQ10",
-                        "hltL3fL1sL1SingleMuOpenL1f7L2f0L3Filtered12",
-                        "hltL3fL1sL1SingleMuOpenL1f7L2f0L3Filtered15",
-                        "hltL3fL1sL1SingleMuOpenL1f7L2f0L3Filtered20",
-                        "hltL2fL1sMu3OpenL1f0L2Filtered3NHitQ15",
-                        "hltL2fL1sMu3OpenL1f0L2Filtered5NHitQ15",
-                        "hltL2fL1sMu3OpenL1f0L2Filtered7NHitQ15",
-                        "hltL3fL1sL1SingleMu3OpenL1f0L2f0L3Filtered3NHitQ10",
-                        "hltL3fL1sL1SingleMu3OpenL1f0L2f0L3Filtered5NHitQ10",
-                        "hltL3fL1sL1SingleMu3OpenL1f0L2f0L3Filtered7NHitQ10",
-                        "hltL3fL1sL1SingleMu3OpenL1f7L2f0L3Filtered12",
-                        "hltL3fL1sL1SingleMu3OpenL1f7L2f0L3Filtered15",
-                        "hltL3fL1sL1SingleMu3OpenL1f7L2f0L3Filtered20",
-			)
-                }
 
 ## Global tag
 if isMC:
@@ -162,7 +64,7 @@ else:
 # load the Geometry and Magnetic Field
 process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('Configuration.StandardSequences.Services_cff')
-process.load('Configuration.Geometry.GeometryExtended2026D84Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2026D84Reco_cff') # to be changed accordingly
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 
 # Global Tag:
@@ -177,7 +79,6 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globalTag, '')
 # For OniaTree Analyzer
 from HiAnalysis.HiOnia.oniaTreeAnalyzer_cff import oniaTreeAnalyzer
 oniaTreeAnalyzer(process,
-                 muonTriggerList=triggerList, #HLTProName=HLTProcess,
                  muonSelection=muonSelection, L1Stage=2, isMC=isMC, outputFileName=options.outputFile, doTrimu=doTrimuons,
                  miniAOD=miniAOD, miniAODcuts=miniAOD_muonCuts#, OnlySingleMuons=True
 )
@@ -198,7 +99,6 @@ process.hionia.SofterSgMuAcceptance = cms.bool(SofterSgMuAcceptance)
 process.hionia.SumETvariables   = cms.bool(SumETvariables)
 process.hionia.applyCuts        = cms.bool(applyCuts)
 process.hionia.AtLeastOneCand   = cms.bool(atLeastOneCand)
-process.hionia.OneMatchedHLTMu  = cms.int32(OneMatchedHLTMu)
 process.hionia.checkTrigNames   = cms.bool(False)#change this to get the event-level trigger info in hStats output (but creates lots of warnings when fake trigger names are used)
 process.hionia.genealogyInfo = cms.bool(False)
 process.hionia.isHI = cms.untracked.bool(False)
@@ -232,7 +132,6 @@ process.oniaTreeAna = cms.Path(process.oniaTreeAna)
 if miniAOD:
   from HiSkim.HiOnia2MuMu.onia2MuMuPAT_cff import changeToMiniAOD
   changeToMiniAOD(process)
-  process.unpackedMuons.addPropToMuonSt = cms.bool(UsePropToMuonSt)
 
 #----------------------------------------------------------------------------
 #Options:

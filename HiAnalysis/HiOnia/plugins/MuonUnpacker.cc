@@ -8,7 +8,6 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/IPTools/interface/IPTools.h"
-#include "MuonAnalysis/MuonAssociators/interface/PropagateToMuonSetup.h"
 
 
 namespace pat {
@@ -25,7 +24,6 @@ namespace pat {
           beamSpotToken_(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpot"))),
           trackBuilderToken_(esConsumes(edm::ESInputTag("", "TransientTrackBuilder"))),
           candidateMuonIDToken_(getPackedCandidateMap(muonSelectors_)),
-          propToMuonSetup_(getMuonPropagator(iConfig, consumesCollector())),
           patMuonPutToken_(produces<pat::MuonCollection>())
       {
       };
@@ -46,7 +44,6 @@ namespace pat {
       const edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
       const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> trackBuilderToken_;
       const PackedCandidateRefVectorMap candidateMuonIDToken_;
-      const std::unique_ptr<PropagateToMuonSetup> propToMuonSetup_;
       const edm::EDPutTokenT<pat::MuonCollection> patMuonPutToken_;
 
       PackedCandidateRefVectorMap getPackedCandidateMap(const std::vector<std::string>& v)
@@ -59,12 +56,6 @@ namespace pat {
         return m;
       };
 
-      PropagateToMuonSetup* getMuonPropagator(const edm::ParameterSet& iConfig, edm::ConsumesCollector iC)
-      {
-        if (iConfig.getParameter<bool>("addPropToMuonSt"))
-          return new PropagateToMuonSetup(iConfig, iC);
-        return nullptr;
-      };
 
       void addMuon(pat::Muon&, const pat::PackedCandidateRef&, const bool&,
                    const reco::TrackRef&, const TransientTrackBuilder&,
@@ -141,18 +132,6 @@ void pat::MuonUnpacker::produce(edm::StreamID, edm::Event& iEvent, const edm::Ev
       pat::Muon muon;
       addMuon(muon, cand, !isLostTrack, track, trackBuilder, primaryVertex, beamSpot, selMap);
       output.emplace_back(muon);
-    }
-  }
-
-  // propagate muon position to 2nd muon station (used for L1 muon matching)
-  if (propToMuonSetup_) {
-    const auto propToMuon = propToMuonSetup_->init(iSetup);
-    for (auto& muon : output) {
-      if (muon.track().isNull()) continue;
-      const auto& fts = propToMuon.extrapolate(*muon.track());
-      if (!fts.isValid()) continue;
-      muon.addUserFloat("l1Eta", fts.globalPosition().eta());
-      muon.addUserFloat("l1Phi", fts.globalPosition().phi());
     }
   }
   
@@ -249,7 +228,6 @@ void pat::MuonUnpacker::fillDescriptions(edm::ConfigurationDescriptions& descrip
   desc.add<edm::InputTag>("primaryVertices", edm::InputTag("unpackedTracksAndVertices"))->setComment("primary vertex input collection");
   desc.add<edm::InputTag>("beamSpot", edm::InputTag("offlineBeamSpot"))->setComment("beam spot collection");
   desc.add<std::vector<std::string> >("muonSelectors", {"AllTrackerMuons", "TMOneStationTight"})->setComment("muon selectors");
-  desc.add<bool>("addPropToMuonSt", false)->setComment("add eta/phi propagated to 2nd muon station for L1 matching");
   desc.add<std::string>("useTrack", "tracker");
   desc.add<std::string>("useState", "atVertex");
   desc.add<bool>("useSimpleGeometry", true);

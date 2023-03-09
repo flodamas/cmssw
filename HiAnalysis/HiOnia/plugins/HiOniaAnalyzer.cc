@@ -323,6 +323,10 @@ private:
   bool Reco_mu_isPF[Max_mu_size];           // Vector of isParticleFlow muon
   bool Reco_mu_isTracker[Max_mu_size];
   bool Reco_mu_isGlobal[Max_mu_size];
+  bool Reco_mu_isRPC[Max_mu_size];
+  bool Reco_mu_isGEM[Max_mu_size];
+  bool Reco_mu_isME0[Max_mu_size];
+
   bool Reco_mu_isSoftCutBased[Max_mu_size];
   bool Reco_mu_isHybridSoft[Max_mu_size];
   Short_t Reco_mu_candType[Max_mu_size];  // candidate type of muon. 0 (or not present): muon collection, 1: packedPFCandidate, 2: lostTrack collection
@@ -928,6 +932,11 @@ void HiOniaAnalyzer::fillTreeMuon(const pat::Muon* muon, int iType) {
       Reco_mu_isTracker[Reco_mu_size] = muon->isTrackerMuon();
       Reco_mu_isGlobal[Reco_mu_size] = muon->isGlobalMuon();
       Reco_mu_isPF[Reco_mu_size] = muon->isPFMuon();
+
+      Reco_mu_isRPC[Reco_mu_size] = muon->isRPCMuon();
+      Reco_mu_isGEM[Reco_mu_size] = muon->isGEMMuon();
+      Reco_mu_isME0[Reco_mu_size] = muon->isME0Muon();
+
       Reco_mu_isSoftCutBased[Reco_mu_size] = muon->passed(reco::Muon::SoftCutBasedId);
       Reco_mu_isHybridSoft[Reco_mu_size] = isHybridSoftMuon(muon);
       Reco_mu_isMedium[Reco_mu_size] = muon->isMediumMuon();
@@ -3236,6 +3245,10 @@ void HiOniaAnalyzer::InitTree() {
     myTree->Branch("Reco_mu_isPF", Reco_mu_isPF, "Reco_mu_isPF[Reco_mu_size]/O");
     myTree->Branch("Reco_mu_isTracker", Reco_mu_isTracker, "Reco_mu_isTracker[Reco_mu_size]/O");
     myTree->Branch("Reco_mu_isGlobal", Reco_mu_isGlobal, "Reco_mu_isGlobal[Reco_mu_size]/O");
+    myTree->Branch("Reco_mu_isRPC", Reco_mu_isRPC, "Reco_mu_isRPC[Reco_mu_size]/O");
+    myTree->Branch("Reco_mu_isGEM", Reco_mu_isGEM, "Reco_mu_isGEM[Reco_mu_size]/O");
+    myTree->Branch("Reco_mu_isME0", Reco_mu_isME0, "Reco_mu_isME0[Reco_mu_size]/O");
+
     myTree->Branch("Reco_mu_isSoftCutBased", Reco_mu_isSoftCutBased, "Reco_mu_isSoftCutBased[Reco_mu_size]/O");
     myTree->Branch("Reco_mu_isHybridSoft", Reco_mu_isHybridSoft, "Reco_mu_isHybridSoft[Reco_mu_size]/O");
     myTree->Branch("Reco_mu_isMedium", Reco_mu_isMedium, "Reco_mu_isMedium[Reco_mu_size]/O");

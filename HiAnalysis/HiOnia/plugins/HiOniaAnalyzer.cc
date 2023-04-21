@@ -390,7 +390,8 @@ private:
   float SumET_HF, SumET_HFplus, SumET_HFminus, SumET_HFplusEta4, SumET_HFminusEta4, SumET_HFhit, SumET_HFhitPlus,
       SumET_HFhitMinus, SumET_EB, SumET_ET, SumET_EE, SumET_EEplus, SumET_EEminus, SumET_ZDC, SumET_ZDCplus,
       SumET_ZDCminus;
-
+	
+  int NTotalTracks;
 
   // handles
   edm::Handle<pat::CompositeCandidateCollection> collJpsi;
@@ -697,6 +698,10 @@ void HiOniaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     return;
   }
 
+  // store the total number of tracks in the event to get a proxy of the centrality
+  iEvent.getByToken(_recoTracksToken, collTracks);
+
+  NTotalTracks = collTracks.isValid() ? collTracks->size() : -1;
 
   edm::Handle<reco::Centrality> centrality;
   edm::Handle<int> cbin_;
@@ -3108,7 +3113,7 @@ void HiOniaAnalyzer::InitTree() {
     myTree->Branch("NpixelTracks", &NpixelTracks, "NpixelTracks/S");
   }
   myTree->Branch("Ntracks", &Ntracks, "Ntracks/S");
-
+  myTree->Branch("NTotalTracks", &NTotalTracks,"NTotalTracks/I");
 
   if ((_isHI || _isPA) && _SumETvariables) {
     myTree->Branch("SumET_HF", &SumET_HF, "SumET_HF/F");

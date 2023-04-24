@@ -217,7 +217,8 @@ void TriggerAnalyzer::analyze(edm::Event const& iEvent, edm::EventSetup const& i
       bool accept = result.getAlgoDecisionFinal(l1index);
       l1flag[index] = accept;
 
-      l1GtUtils.getPrescaleByBit(l1index, (double &)l1Prescl[index]);
+      l1GtUtils.getPrescaleByBit(l1index, (int &)l1Prescl[index]);
+      //l1GtUtils.getPrescaleByBit(l1index, (double &)l1Prescl[index]);
     }
 
     // l1results.isValid

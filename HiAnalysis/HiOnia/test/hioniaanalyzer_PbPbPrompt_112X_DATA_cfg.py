@@ -24,6 +24,7 @@ useSVfinder    = False # External SV finder to check if the muons are from a res
 miniAOD        = True # whether the input file is in miniAOD format (default is AOD)
 miniAOD_muonCuts = False # Apply the cuts used in the muon collections of miniAOD. Only has an effect with AOD.
 useL1MuonProp = False # whether use of eta, phi information at L1 propagated from PV. Only use for offline-online matching studies
+doEvtPlane    = True # if using EvtPlane
 #----------------------------------------------------------------------------
 
 # Print Onia Tree settings:
@@ -62,7 +63,7 @@ options.inputFiles =[
   #'/store/hidata/HIRun2018A/HIDoubleMuon/AOD/04Apr2019-v1/310001/FED19720-0CE4-5B4D-91E0-DB230A5046EB.root'
   #'/store/hidata/HIRun2018A/HIDoubleMuon/AOD/PromptReco-v1/000/326/859/00000/9D9FEF75-B31A-9645-9090-0F99D895AED9.root'
 ]
-options.maxEvents = -1 # -1 means all events
+options.maxEvents = 100 # -1 means all events
 
 # Get and parse the command line arguments
 options.parseArguments()
@@ -221,6 +222,8 @@ process.hionia.OneMatchedHLTMu  = cms.int32(OneMatchedHLTMu)
 process.hionia.useSVfinder      = cms.bool(useSVfinder)
 process.hionia.useL1MuonProp    = cms.bool(useL1MuonProp)
 process.hionia.checkTrigNames   = cms.bool(False)#change this to get the event-level trigger info in hStats output (but creates lots of warnings when fake trigger names are used)
+
+process.hionia.useEvtPlane      = cms.untracked.bool(doEvtPlane)
 
 process.oniaTreeAna.replace(process.hionia, process.centralityBin * process.hionia )
 

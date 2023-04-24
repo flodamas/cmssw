@@ -399,6 +399,9 @@ private:
   float rpAng[50];
   float rpCos[50];
   float rpSin[50];
+  float rpAng_origin[50];
+  float rpCos_origin[50];
+  float rpSin_origin[50];
 
   // handles
   edm::Handle<pat::CompositeCandidateCollection> collJpsi;
@@ -878,6 +881,9 @@ HiOniaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     iEvent.getByToken(_evtPlaneTagToken,flatEvtPlanes);
     if(flatEvtPlanes.isValid()) {
       for (reco::EvtPlaneCollection::const_iterator rp = flatEvtPlanes->begin(); rp!=flatEvtPlanes->end(); rp++) {
+        rpAng_origin[nEP] = rp->angle(0);   // Using Event Plane Level 0 -> w/o recentering and w/o flattening. 
+        rpSin_origin[nEP] = rp->sumSin(0);  // Using Event Plane Level 0 -> w/o recentering and w/o flattening. 
+        rpCos_origin[nEP] = rp->sumCos(0);  // Using Event Plane Level 0 -> w/o recentering and w/o flattening. 
         rpAng[nEP] = rp->angle(2);   // Using Event Plane Level 2 -> Includes recentering and flattening. 
         rpSin[nEP] = rp->sumSin(2);  // Using Event Plane Level 2 -> Includes recentering and flattening. 
         rpCos[nEP] = rp->sumCos(2);  // Using Event Plane Level 2 -> Includes recentering and flattening. 
@@ -3366,6 +3372,9 @@ HiOniaAnalyzer::InitTree()
     myTree->Branch("rpAng", &rpAng, "rpAng[nEP]/F");
     myTree->Branch("rpSin", &rpSin, "rpSin[nEP]/F");
     myTree->Branch("rpCos", &rpCos, "rpCos[nEP]/F");
+    myTree->Branch("rpAng_origin", &rpAng_origin, "rpAng_origin[nEP]/F");
+    myTree->Branch("rpSin_origin", &rpSin_origin, "rpSin_origin[nEP]/F");
+    myTree->Branch("rpCos_origin", &rpCos_origin, "rpCos_origin[nEP]/F");
   }
 
   if(!_onlySingleMuons){

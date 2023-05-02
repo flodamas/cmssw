@@ -24,6 +24,8 @@ keepExtraColl  = False # General Tracks + Stand Alone Muons + Converted Photon c
 miniAOD        = True # whether the input file is in miniAOD format (default is AOD)
 miniAOD_muonCuts = False # Apply the cuts used in the muon collections of miniAOD. Only has an effect with AOD.
 useL1MuonProp = False # whether use of eta, phi information at L1 propagated from PV. Only use for offline-online matching studies
+
+doEvtPlane    = True # if using EvtPlane
 #----------------------------------------------------------------------------
 
 # Print Onia Tree settings:
@@ -49,8 +51,7 @@ options = VarParsing.VarParsing ('analysis')
 options.outputFile = "Oniatree_MC_miniAOD.root"
 options.secondaryOutputFile = "Jpsi_DataSet.root"
 options.inputFiles =[
-  #'/store/himc/HINPbPbAutumn18DR/JPsi_pThat-2_TuneCP5_HydjetDrumMB_5p02TeV_Pythia8/AODSIM/mva98_103X_upgrade2018_realistic_HI_v11-v1/120000/06BA15D4-3041-D54E-AB6D-F32A05C95948.root'
-  'file:/home/llr/cms/falmagne/miniAOD/step2_miniAOD_MC_JPsiEmb.root'
+  '/store/himc/HINPbPbSpring21MiniAOD/Upsiloni2S_pThat-2_TuneCP5_HydjetDrumMB_FixCalo_5p02TeV_pythia8/MINIAODSIM/FixL1CaloGT_112X_upgrade2018_realistic_HI_v9-v1/70000/107bd450-6830-4d23-93ce-39676327ab8f.root'
 ]
 options.maxEvents = -1 # -1 means all events
 
@@ -218,6 +219,7 @@ process.hionia.OneMatchedHLTMu  = cms.int32(OneMatchedHLTMu)
 process.hionia.useL1MuonProp    = cms.bool(useL1MuonProp)
 process.hionia.checkTrigNames   = cms.bool(False)#change this to get the event-level trigger info in hStats output (but creates lots of warnings when fake trigger names are used)
 
+process.hionia.useEvtPlane      = cms.untracked.bool(doEvtPlane)
 '''
 #----------------------------------------------------------------------------
 

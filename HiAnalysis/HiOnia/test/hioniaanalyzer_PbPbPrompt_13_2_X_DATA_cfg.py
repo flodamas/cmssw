@@ -24,7 +24,6 @@ miniAOD        = True # whether the input file is in miniAOD format (default is 
 UsePropToMuonSt = True # whether to use L1 propagated muons (works only for miniAOD now)
 pdgId = 443 # J/Psi : 443, Y(1S) : 553
 useMomFormat = "vector" # default "array" for TClonesArray of TLorentzVector. Use "vector" for std::vector<float> of pt, eta, phi, M
-useJSON = True # Use json file with cmsRun
 #----------------------------------------------------------------------------
 
 # Print Onia Tree settings:
@@ -41,7 +40,7 @@ print( "[INFO] onlySoftMuons        = " + ("True" if OnlySoftMuons else "False")
 print( "[INFO] doTrimuons           = " + ("True" if doTrimuons else "False") )
 print( "[INFO] doDimuonTrk          = " + ("True" if doDimuonTrk else "False") )
 print( "[INFO] atLeastOneCand       = " + ("True" if atLeastOneCand else "False") )
-print( "[INFO] OneMatchedHLTMu      = " + ("True" if OneMatchedHLTMu else "False") )
+print( "[INFO] OneMatchedHLTMu      = " + ("True" if OneMatchedHLTMu > -1 else "False") )
 print( "[INFO] miniAOD              = " + ("True" if miniAOD else "False") )
 print( "[INFO] UsePropToMuonSt      = " + ("True" if UsePropToMuonSt else "False") )
 print( " " )
@@ -105,9 +104,9 @@ triggerList    = {
 
 ## Global tag
 if isMC:
-  globalTag = 'auto:phase1_2023_realistic_hi' #for Run3 MC : phase1_2023_realistic_hi
+  globalTag = '132X_mcRun3_2023_realistic_HI_v10' #for Run3 MC : phase1_2023_realistic_hi
 else:
-  globalTag = '132X_dataRun3_Prompt_v4' # 'auto:run3_data_prompt'
+  globalTag = '132X_dataRun3_Prompt_v7' # 'auto:run3_data_prompt'
 
 #----------------------------------------------------------------------------
 
@@ -126,12 +125,12 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globalTag, '')
 process.load("RecoHI.HiCentralityAlgos.CentralityBin_cfi")
 process.centralityBin.Centrality = cms.InputTag("hiCentrality")
 process.centralityBin.centralityVariable = cms.string("HFtowers")
-print('\n\033[31m~*~ USING PRELIMINARY CENTRALITY TABLE FOR 2023 PbPb DATA (Run 374810)~*~\033[0m\n')
+print('\n\033[31m~*~ USING NOMINAL CENTRALITY TABLE FOR 2023 PbPb DATA ~*~\033[0m\n')
 process.GlobalTag.snapshotTime = cms.string("9999-12-31 23:59:59.000")
 process.GlobalTag.toGet.extend([
     cms.PSet(record = cms.string("HeavyIonRcd"),
-        tag = cms.string("CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1302x04_offline_374810"),
-        connect = cms.string("sqlite_file:CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1302x04_offline_374810.db"),
+        tag = cms.string("CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_Run3v1302x04_Nominal_Offline"),
+        connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
         label = cms.untracked.string("HFtowers")
         ),
     ])

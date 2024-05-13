@@ -40,7 +40,7 @@ print( "[INFO] onlySoftMuons        = " + ("True" if OnlySoftMuons else "False")
 print( "[INFO] doTrimuons           = " + ("True" if doTrimuons else "False") )
 print( "[INFO] doDimuonTrk          = " + ("True" if doDimuonTrk else "False") )
 print( "[INFO] atLeastOneCand       = " + ("True" if atLeastOneCand else "False") )
-print( "[INFO] OneMatchedHLTMu      = " + ("True" if OneMatchedHLTMu else "False") )
+print( "[INFO] OneMatchedHLTMu      = " + ("True" if OneMatchedHLTMu > -1 else "False") )
 print( "[INFO] miniAOD              = " + ("True" if miniAOD else "False") )
 print( "[INFO] UsePropToMuonSt      = " + ("True" if UsePropToMuonSt else "False") )
 print( " " )
@@ -100,9 +100,9 @@ triggerList    = {
 
 ## Global tag
 if isMC:
-  globalTag = '132X_mcRun3_2023_realistic_HI_v5' #for Run3 MC : phase1_2023_realistic_hi
+  globalTag = '132X_mcRun3_2023_realistic_HI_v10' #for Run3 MC : phase1_2023_realistic_hi
 else:
-  globalTag = 'auto:run3_data_prompt' # for Run3 data (test run) : 124X_dataRun3_Prompt_v10
+  globalTag = '132X_dataRun3_Prompt_v7' # 'auto:run3_data_prompt'
 
 #----------------------------------------------------------------------------
 
@@ -120,12 +120,12 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globalTag, '')
 process.load("RecoHI.HiCentralityAlgos.CentralityBin_cfi")
 process.centralityBin.Centrality = cms.InputTag("hiCentrality")
 process.centralityBin.centralityVariable = cms.string("HFtowers")
-print('\n\033[31m~*~ USING CENTRALITY TABLE (PRELIMINARY) FOR PbPb 2023 ~*~\033[0m\n')
+print('\n\033[31m~*~ USING OFFICIAL MC CENTRALITY TABLE FOR PbPb 2023 ~*~\033[0m\n')
 process.GlobalTag.snapshotTime = cms.string("9999-12-31 23:59:59.000")
 process.GlobalTag.toGet.extend([
     cms.PSet(record = cms.string("HeavyIonRcd"),
-        tag = cms.string("CentralityTable_HFtowers200_HydjetDrum5F_v1302x04_RECODEBUG_MC2023"),
-	connect = cms.string("sqlite_file:CentralityTable_HFtowers200_HydjetDrum5F_v1302x04_RECODEBUG_MC2023.db"),
+        tag = cms.string("CentralityTable_HFtowers200_HydjetDrum5F_Run3v1302x04_Official_MC"),
+        connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
         label = cms.untracked.string("HFtowers")
         ),
     ])

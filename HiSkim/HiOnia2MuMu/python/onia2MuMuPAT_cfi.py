@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
-onia2MuMuPAT = cms.EDProducer('Onia2MuMuPAT',
-  muons = cms.InputTag("patMuons"),
+onia2MuMuPAT = cms.EDProducer('HiOnia2MuMuPAT',
+  muons = cms.InputTag("patMuonsWithTrigger"),
   beamSpotTag = cms.InputTag("offlineBeamSpot"),
   primaryVertexTag = cms.InputTag("offlinePrimaryVertices"),
   srcTracks = cms.InputTag("generalTracks"),
@@ -22,5 +22,7 @@ onia2MuMuPAT = cms.EDProducer('Onia2MuMuPAT',
   DimuonTrk  = cms.bool(False), ## Make collections of Jpsi+track candidates in addition to dimuons, and keep only events with >0 Jpsi+trk 
   flipJpsiDirection = cms.int32(0), ## flip the Jpsi direction, before combining it with a third muon
   resolvePileUpAmbiguity = cms.bool(False),   ## Order PVs by their vicinity to the J/psi vertex, not by sumPt                            
-  trackMass = cms.int32(0.13957018) ## mass assigned to the track to be combined with the dimuons
+  trackMass = cms.double(0.13957018), ## mass assigned to the track to be combined with the dimuons
+  addMCTruth = cms.bool(False),
+particleType             = cms.int32(211), ## pdgInt assigned to the track to be combined with the dimuons
 )

@@ -61,6 +61,8 @@ HiOnia2MuMuPAT::HiOnia2MuMuPAT(const edm::ParameterSet& iConfig):
   produces<pat::CompositeCandidateCollection>("");
   produces<pat::CompositeCandidateCollection>("trimuon");
   produces<pat::CompositeCandidateCollection>("dimutrk");
+  triggerResultsToken_ = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults::HLT"));
+  produces<pat::MuonCollection>("muon");
 }
 
 
@@ -237,6 +239,16 @@ HiOnia2MuMuPAT::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   }
   int ourMuNb = ourMuons.size();
   //std::cout<<"number of soft muons = "<<ourMuNb<<std::endl;
+
+  Handle<edm::TriggerResults> collTriggerResults;
+    iEvent.getByToken(triggerResultsToken_,collTriggerResults);
+    if(collTriggerResults.isValid()) {
+      for(auto& mu : ourMuons) {
+        for(auto& obj : mu.triggerObjectMatches()) {
+          const_cast<pat::TriggerObjectStandAlone*>(&obj)->unpackNamesAndLabels(iEvent, *collTriggerResults);
+        }
+      }
+    }
 
   if(onlySingleMuons_) goto skipMuonLoop;
  
@@ -1236,6 +1248,9 @@ HiOnia2MuMuPAT::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     std::sort(dimutrkOutput->begin(),dimutrkOutput->end(),vPComparator_);
     iEvent.put(std::move(dimutrkOutput),"dimutrk");
   }
+
+  std::unique_ptr<pat::MuonCollection> muonOutput(new pat::MuonCollection(ourMuons));
+  iEvent.put(std::move(muonOutput),"muon");
 
   //smart pointer does not work for this variable
   delete jpsi_c;

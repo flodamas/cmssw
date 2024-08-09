@@ -4,10 +4,13 @@ hionia = cms.EDAnalyzer('HiOniaAnalyzer',
                         srcMuon          = cms.InputTag("patMuonsWithTrigger"),
                         srcMuonNoTrig    = cms.InputTag("patMuonsWithoutTrigger"),
                         srcDimuon        = cms.InputTag("onia2MuMuPatGlbGlb"),
-                        srcTracks        = cms.InputTag("hiGeneralTracks"),
+                        srcTrimuon       = cms.InputTag("onia2MuMuPatGlbGlb","trimuon"),      # Name of Onia Skim Collection for trimuons
+                        srcDimuTrk       = cms.InputTag("onia2MuMuPatGlbGlb","dimutrk"),      # Name of Onia Skim Collection for Jpsi+track
+                        srcSV            = cms.InputTag("inclusiveSecondaryVerticesLoose",""), # Name of SV collection
+                        srcTracks        = cms.InputTag("generalTracks"),
                         genParticles     = cms.InputTag("genParticles"),
                         EvtPlane         = cms.InputTag("hiEvtPlaneFlat","recoLevel"),
-                        primaryVertexTag = cms.InputTag("hiSelectedVertex"),
+                        primaryVertexTag = cms.InputTag("offlinePrimaryVertices"),
                         
                         triggerResultsLabel = cms.InputTag("TriggerResults","","HLT"),
 

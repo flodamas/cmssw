@@ -85,7 +85,6 @@ private:
   bool checkDimuTrkCuts(const pat::CompositeCandidate* cand, const pat::Muon* muon1, const pat::Muon* muon2, const reco::RecoChargedCandidate* trk, bool(HiOniaAnalyzer::* callFunc1)(const pat::Muon*), bool(HiOniaAnalyzer::* callFunc2)(const pat::Muon*), bool(HiOniaAnalyzer::* callFunc3)(const reco::TrackRef));
 
   reco::GenParticleRef findDaughterRef(reco::GenParticleRef GenParticleDaughter, int GenParticlePDG);
-  bool isSameLorentzV(TLorentzVector* v1, TLorentzVector* v2);
   int IndexOfThisMuon(TLorentzVector* v1, bool isGen=false);
   int IndexOfThisTrack(TLorentzVector* v1, bool isGen=false);
   int IndexOfThisJpsi(int mu1_idx, int mu2_idx, int flipJpsi=0);
@@ -108,9 +107,7 @@ private:
   bool isTrkInMuonAccept(TLorentzVector trk4mom, std::string muonType);
 
   bool isSoftMuonBase(const pat::Muon* aMuon);
-  bool isSoftMuon(const pat::Muon* aMuon);
   bool isHybridSoftMuon(const pat::Muon* aMuon);
-  bool isTightMuon(const pat::Muon* aMuon);
   Short_t MuInSV(TLorentzVector v1, TLorentzVector v2, TLorentzVector v3);
 
   void fillRecoTracks();
@@ -318,6 +315,12 @@ private:
   bool Reco_mu_TrkMuArb[Max_mu_size];      // Vector of TrackerMuonArbitrated
   bool Reco_mu_TMOneStaTight[Max_mu_size]; // Vector of TMOneStationTight
   bool Reco_mu_isPF[Max_mu_size]; // Vector of isParticleFlow muon
+  bool Reco_mu_isTracker[Max_mu_size];
+  bool Reco_mu_isGlobal[Max_mu_size];
+  bool Reco_mu_isSoftCutBased[Max_mu_size];
+  bool Reco_mu_isHybridSoft[Max_mu_size];
+  bool Reco_mu_isMedium[Max_mu_size];
+  bool Reco_mu_isTightCutBased[Max_mu_size];
   Short_t Reco_mu_candType[Max_mu_size]; // candidate type of muon. 0 (or not present): muon collection, 1: packedPFCandidate, 2: lostTrack collection
   bool Reco_mu_InTightAcc[Max_mu_size];  // Is in the tight acceptance for global muons
   bool Reco_mu_InLooseAcc[Max_mu_size];  // Is in the loose acceptance for global muons
@@ -1059,6 +1062,12 @@ HiOniaAnalyzer::fillTreeMuon(const pat::Muon* muon, int iType, ULong64_t trigBit
       Reco_mu_SelectionType[Reco_mu_size] = muonIDmask(muon);
       Reco_mu_StationsMatched[Reco_mu_size] = muon->numberOfMatchedStations();
       Reco_mu_isPF[Reco_mu_size] = muon->isPFMuon();
+      Reco_mu_isTracker[Reco_mu_size] = muon->isTrackerMuon();
+      Reco_mu_isGlobal[Reco_mu_size] = muon->isGlobalMuon();
+      Reco_mu_isSoftCutBased[Reco_mu_size] = muon->passed(reco::Muon::SoftCutBasedId);
+      Reco_mu_isHybridSoft[Reco_mu_size] = isHybridSoftMuon(muon);
+      Reco_mu_isMedium[Reco_mu_size] = muon->passed(reco::Muon::CutBasedIdMedium);
+      Reco_mu_isTightCutBased[Reco_mu_size] = muon->passed(reco::Muon::CutBasedIdTight);
       Reco_mu_candType[Reco_mu_size] = (Short_t)(muon->hasUserInt("candType"))?(muon->userInt("candType")):(-1);
      
       if (!iTrack.isNull()){
@@ -2444,13 +2453,6 @@ HiOniaAnalyzer::isSoftMuonBase(const pat::Muon* aMuon) {
           );
 }
 
-bool
-HiOniaAnalyzer::isSoftMuon(const pat::Muon* aMuon) {
-  return (isSoftMuonBase(aMuon) &&
-          muon::isGoodMuon(*aMuon, muon::TMOneStationTight) &&
-          aMuon->innerTrack()->quality(reco::TrackBase::highPurity)
-          );
-}
 
 bool
 HiOniaAnalyzer::isHybridSoftMuon(const pat::Muon* aMuon) {
@@ -2459,20 +2461,6 @@ HiOniaAnalyzer::isHybridSoftMuon(const pat::Muon* aMuon) {
           );
 }
 
-bool
-HiOniaAnalyzer::isTightMuon(const pat::Muon* aMuon) {
-  return (
-          aMuon->isGlobalMuon() &&
-          //aMuon->isPFMuon()   &&
-          aMuon->globalTrack()->normalizedChi2() < 10. &&
-          aMuon->globalTrack()->hitPattern().numberOfValidMuonHits() > 0 &&
-          aMuon->numberOfMatchedStations() > 1 &&
-          fabs(aMuon->muonBestTrack()->dxy(RefVtx)) < 0.2 &&
-          fabs(aMuon->muonBestTrack()->dz(RefVtx)) < 0.5  &&
-          aMuon->innerTrack()->hitPattern().numberOfValidPixelHits() > 0 &&
-          aMuon->innerTrack()->hitPattern().trackerLayersWithMeasurement() > 5
-          );
-}
 
 bool
 HiOniaAnalyzer::selGlobalMuon(const pat::Muon* aMuon) {
@@ -2487,7 +2475,7 @@ HiOniaAnalyzer::selGlobalMuon(const pat::Muon* aMuon) {
     return true;
   
   bool isInAcc = isMuonInAccept(aMuon, (std::string)(_SofterSgMuAcceptance?"GLBSOFT":"GLB"));
-  bool isGood = (_selTightGlobalMuon ? isTightMuon(aMuon) : isSoftMuonBase(aMuon) );
+  bool isGood = (_selTightGlobalMuon ? aMuon->passed(reco::Muon::CutBasedIdTight) : isSoftMuonBase(aMuon) );
 
   return ( isInAcc && isGood && (!_miniAODcut || PassMiniAODcut(aMuon)) );
 }
@@ -2613,11 +2601,6 @@ HiOniaAnalyzer::InitEvent()
   return;
 }
 
-bool
-HiOniaAnalyzer::isSameLorentzV(TLorentzVector* v1, TLorentzVector* v2){
-  return (fabs(v1->Pt() - v2->Pt()) < 1e-5
-          && fabs(v1->Phi() - v2->Phi()) < 1e-6);
-}
 
 int
 HiOniaAnalyzer::IndexOfThisMuon(TLorentzVector* v1, bool isGen){
@@ -3488,6 +3471,12 @@ HiOniaAnalyzer::InitTree()
     myTree->Branch("Reco_mu_highPurity", Reco_mu_highPurity,   "Reco_mu_highPurity[Reco_mu_size]/O");
     // myTree->Branch("Reco_mu_TrkMuArb", Reco_mu_TrkMuArb,   "Reco_mu_TrkMuArb[Reco_mu_size]/O");
     myTree->Branch("Reco_mu_isPF", Reco_mu_isPF, "Reco_mu_isPF[Reco_mu_size]/O");
+    myTree->Branch("Reco_mu_isTracker", Reco_mu_isTracker, "Reco_mu_isTracker[Reco_mu_size]/O");
+    myTree->Branch("Reco_mu_isGlobal", Reco_mu_isGlobal, "Reco_mu_isGlobal[Reco_mu_size]/O");
+    myTree->Branch("Reco_mu_isSoftCutBased", Reco_mu_isSoftCutBased, "Reco_mu_isSoftCutBased[Reco_mu_size]/O");
+    myTree->Branch("Reco_mu_isHybridSoft", Reco_mu_isHybridSoft, "Reco_mu_isHybridSoft[Reco_mu_size]/O");
+    myTree->Branch("Reco_mu_isMedium", Reco_mu_isMedium, "Reco_mu_isMedium[Reco_mu_size]/O");
+    myTree->Branch("Reco_mu_isTightCutBased", Reco_mu_isTightCutBased, "Reco_mu_isTightCutBased[Reco_mu_size]/O");
     myTree->Branch("Reco_mu_candType", Reco_mu_candType, "Reco_mu_candType[Reco_mu_size]/S");
     myTree->Branch("Reco_mu_nPixValHits", Reco_mu_nPixValHits,   "Reco_mu_nPixValHits[Reco_mu_size]/I");
     myTree->Branch("Reco_mu_nMuValHits", Reco_mu_nMuValHits,   "Reco_mu_nMuValHits[Reco_mu_size]/I");

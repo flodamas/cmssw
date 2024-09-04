@@ -23,6 +23,7 @@
 #include <TLorentzVector.h>
 #include <TVector2.h>
 #include <TClonesArray.h>
+#include <TRegexp.h>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -166,6 +167,8 @@ private:
   std::vector<std::string> theCentralities;
   std::vector<std::string> theTriggerNames;
   std::vector<std::string> theSign;
+  std::map<std::string, std::string> triggerNameMap;
+  std::map<std::string, std::string> filterNameMap;
 
   HLTConfigProvider hltConfig;
   bool hltConfigInit;
@@ -443,9 +446,7 @@ private:
   std::vector<double> _ptbinranges;
   std::vector<double> _etabinranges;
   std::vector<string> _dblTriggerPathNames;
-  std::vector<string> _dblTriggerFilterNames;
   std::vector<string> _sglTriggerPathNames;
-  std::vector<string> _sglTriggerFilterNames;
 
   bool           _onlythebest;
   bool           _applycuts;
@@ -528,7 +529,6 @@ private:
 
   // MC 8E29
   bool isTriggerMatched[sNTRIGGERS];
-  std::string HLTLastFilters[sNTRIGGERS];
   bool alreadyFilled[sNTRIGGERS];
   ULong64_t HLTriggers;
   int trigPrescale[sNTRIGGERS];
@@ -578,9 +578,7 @@ HiOniaAnalyzer::HiOniaAnalyzer(const edm::ParameterSet& iConfig):
   _ptbinranges(iConfig.getParameter< std::vector<double> >("pTBinRanges")),     
   _etabinranges(iConfig.getParameter< std::vector<double> >("etaBinRanges")),   
   _dblTriggerPathNames(iConfig.getParameter< std::vector<string> >("dblTriggerPathNames")),
-  _dblTriggerFilterNames(iConfig.getParameter< std::vector<string> >("dblTriggerFilterNames")),
   _sglTriggerPathNames(iConfig.getParameter< std::vector<string> >("sglTriggerPathNames")),
-  _sglTriggerFilterNames(iConfig.getParameter< std::vector<string> >("sglTriggerFilterNames")),
   _onlythebest(iConfig.getParameter<bool>("onlyTheBest")),              
   _applycuts(iConfig.getParameter<bool>("applyCuts")),
   _SofterSgMuAcceptance(iConfig.getParameter<bool>("SofterSgMuAcceptance")),
@@ -665,18 +663,15 @@ HiOniaAnalyzer::HiOniaAnalyzer(const edm::ParameterSet& iConfig):
   nTrig = NTRIGGERS - 1;
 
   isTriggerMatched[0]=true; // first entry 'hardcoded' true to accept "all" events
-  HLTLastFilters[0] = "";
   theTriggerNames.push_back("NoTrigger");
 
   for (unsigned int iTr = 1; iTr<NTRIGGERS; ++iTr) {
     isTriggerMatched[iTr] = false;
 
     if (iTr<=NTRIGGERS_DBL) {
-      HLTLastFilters[iTr] = _dblTriggerFilterNames.at(iTr-1);
       theTriggerNames.push_back(_dblTriggerPathNames.at(iTr-1));
     }
     else {
-      HLTLastFilters[iTr] = _sglTriggerFilterNames.at(iTr-NTRIGGERS_DBL-1);
       theTriggerNames.push_back(_sglTriggerPathNames.at(iTr-NTRIGGERS_DBL-1));
     }
     //std::cout<<" Trigger "<<iTr<<"\t"<<HLTLastFilters[iTr]<<std::endl;
@@ -686,7 +681,7 @@ HiOniaAnalyzer::HiOniaAnalyzer(const edm::ParameterSet& iConfig):
     std::cout<<"WARNING: the _OneMatchedHLTMu parameter is asking for a wrong trigger number. No matching will be done."<<std::endl;
     _OneMatchedHLTMu=-1;}
   if(_OneMatchedHLTMu>-1)
-    std::cout<<" Will keep only dimuons (trimuons) that have one (two) daughters matched to "<<HLTLastFilters[_OneMatchedHLTMu]<<" filter."<<std::endl;
+    std::cout<<"\nWill keep only dimuons (trimuons) that have one (two) daughters matched to "<<theTriggerNames[_OneMatchedHLTMu]<<" filter."<<std::endl;
 
   etaMax = 2.5;
 
@@ -1980,8 +1975,9 @@ HiOniaAnalyzer::checkTriggers(const pat::CompositeCandidate* aJpsiCand) {
 
       // Trigger passed
       for (unsigned int iTr = 1; iTr<NTRIGGERS; ++iTr) {
-	const auto& mu1HLTMatchesFilter = muon1->triggerObjectMatchesByFilter( HLTLastFilters[iTr] );
-	const auto& mu2HLTMatchesFilter = muon2->triggerObjectMatchesByFilter( HLTLastFilters[iTr] );
+        const auto& lastFilter = filterNameMap.at(theTriggerNames[iTr]);
+	const auto& mu1HLTMatchesFilter = muon1->triggerObjectMatchesByFilter( lastFilter );
+	const auto& mu2HLTMatchesFilter = muon2->triggerObjectMatchesByFilter( lastFilter );
     
 	// const pat::TriggerObjectStandAloneCollection mu1HLTMatchesPath = muon1->triggerObjectMatchesByPath( theTriggerNames.at(iTr), true, false );
 	// const pat::TriggerObjectStandAloneCollection mu2HLTMatchesPath = muon2->triggerObjectMatchesByPath( theTriggerNames.at(iTr), true, false );
@@ -2310,10 +2306,12 @@ HiOniaAnalyzer::makeDimutrkCuts(bool keepWrongSign) {
 
 bool
 HiOniaAnalyzer::checkCuts(const pat::CompositeCandidate* cand, const pat::Muon* muon1,  const pat::Muon* muon2, bool(HiOniaAnalyzer::* callFunc1)(const pat::Muon*), bool(HiOniaAnalyzer::* callFunc2)(const pat::Muon*)) {
+  std::string lastFilter = _OneMatchedHLTMu>=0 ? filterNameMap.at(theTriggerNames[_OneMatchedHLTMu]) : "";
+
   if ( (((this->*callFunc1)(muon1) && (this->*callFunc2)(muon2)) || ((this->*callFunc1)(muon2) && (this->*callFunc2)(muon1))) &&
        (!_applycuts || true) && //Add hard-coded cuts here if desired
        (    (_OneMatchedHLTMu==-1) || 
-	    (muon1->triggerObjectMatchesByFilter(HLTLastFilters[_OneMatchedHLTMu])).size()>0 || (muon2->triggerObjectMatchesByFilter(HLTLastFilters[_OneMatchedHLTMu])).size()>0 
+	    (muon1->triggerObjectMatchesByFilter(lastFilter)).size()>0 || (muon2->triggerObjectMatchesByFilter(lastFilter)).size()>0 
 	    ) ) 
     return true;
   else
@@ -2322,9 +2320,10 @@ HiOniaAnalyzer::checkCuts(const pat::CompositeCandidate* cand, const pat::Muon* 
 
 bool
 HiOniaAnalyzer::checkBcCuts(const pat::CompositeCandidate* cand, const pat::Muon* muon1, const pat::Muon* muon2, const pat::Muon* muon3, bool(HiOniaAnalyzer::* callFunc1)(const pat::Muon*), bool(HiOniaAnalyzer::* callFunc2)(const pat::Muon*), bool(HiOniaAnalyzer::* callFunc3)(const pat::Muon*)) {
-  const auto& mu1HLTMatchesFilter = muon1->triggerObjectMatchesByFilter( HLTLastFilters[(_OneMatchedHLTMu<0)?0:_OneMatchedHLTMu] );
-  const auto& mu2HLTMatchesFilter = muon2->triggerObjectMatchesByFilter( HLTLastFilters[(_OneMatchedHLTMu<0)?0:_OneMatchedHLTMu] );
-  const auto& mu3HLTMatchesFilter = muon3->triggerObjectMatchesByFilter( HLTLastFilters[(_OneMatchedHLTMu<0)?0:_OneMatchedHLTMu] );
+  const auto& lastFilter = filterNameMap.at(theTriggerNames[(_OneMatchedHLTMu<0)?0:_OneMatchedHLTMu]);
+  const auto& mu1HLTMatchesFilter = muon1->triggerObjectMatchesByFilter( lastFilter );
+  const auto& mu2HLTMatchesFilter = muon2->triggerObjectMatchesByFilter( lastFilter );
+  const auto& mu3HLTMatchesFilter = muon3->triggerObjectMatchesByFilter( lastFilter );
   
   if ( ( ((this->*callFunc1)(muon1) && (this->*callFunc2)(muon2) && (this->*callFunc3)(muon3))
          //symmetrize, assuming arguments functions 2 and 3 are THE SAME ! 
@@ -2343,8 +2342,9 @@ HiOniaAnalyzer::checkBcCuts(const pat::CompositeCandidate* cand, const pat::Muon
 
 bool
 HiOniaAnalyzer::checkDimuTrkCuts(const pat::CompositeCandidate* cand, const pat::Muon* muon1, const pat::Muon* muon2, const reco::RecoChargedCandidate* trk, bool(HiOniaAnalyzer::* callFunc1)(const pat::Muon*), bool(HiOniaAnalyzer::* callFunc2)(const pat::Muon*), bool(HiOniaAnalyzer::* callFunc3)(const reco::TrackRef)) {
-  const auto& mu1HLTMatchesFilter = muon1->triggerObjectMatchesByFilter( HLTLastFilters[(_OneMatchedHLTMu<0)?0:_OneMatchedHLTMu] );
-  const auto& mu2HLTMatchesFilter = muon2->triggerObjectMatchesByFilter( HLTLastFilters[(_OneMatchedHLTMu<0)?0:_OneMatchedHLTMu] );
+  const auto& lastFilter = filterNameMap.at(theTriggerNames[(_OneMatchedHLTMu<0)?0:_OneMatchedHLTMu]);
+  const auto& mu1HLTMatchesFilter = muon1->triggerObjectMatchesByFilter( lastFilter );
+  const auto& mu2HLTMatchesFilter = muon2->triggerObjectMatchesByFilter( lastFilter );
   
   if ( ( ((this->*callFunc1)(muon1) && (this->*callFunc2)(muon2) && (this->*callFunc3)(trk->track()))
          || ((this->*callFunc1)(muon2) && (this->*callFunc2)(muon1) && (this->*callFunc3)(trk->track())) ) &&
@@ -3234,7 +3234,7 @@ HiOniaAnalyzer::fillRecoMuons(int iCent)
 
 	  ULong64_t trigBits=0;
 	  for (unsigned int iTr=1; iTr<NTRIGGERS; ++iTr) {
-	    const pat::TriggerObjectStandAloneCollection muHLTMatchesFilter = muon->triggerObjectMatchesByFilter(  HLTLastFilters[iTr] );
+	    const pat::TriggerObjectStandAloneCollection muHLTMatchesFilter = muon->triggerObjectMatchesByFilter( filterNameMap.at(theTriggerNames[iTr]) );
 	    
 	    // apparently matching by path gives false positives so we use matching by filter for all triggers for which we know the filter name
 	    if ( muHLTMatchesFilter.size() > 0 ) {
@@ -3688,6 +3688,30 @@ HiOniaAnalyzer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
   changed = true;
   hltPrescaleInit = hltPrescaleProvider.init(iRun, iSetup, pro, changed);
 
+  //extract trigger path names
+  for (const auto& pathLabel : theTriggerNames)
+    triggerNameMap[pathLabel] = "";
+
+  for (const auto& hltPath : hltConfig.triggerNames())
+    if (hltPath.rfind("HLT_", 0) == 0)
+      for (const auto& pathLabel : theTriggerNames)
+        if (hltPath!="NoString" && TString(hltPath).Contains(TRegexp(TString(pathLabel)))) {
+          triggerNameMap.at(pathLabel) = hltPath;
+          break;
+        }
+
+  //extract last filter names
+  for (const auto& p : triggerNameMap) {
+    filterNameMap[p.first] = "";
+    if (p.second == "") continue;
+    const auto& m = hltConfig.moduleLabels(hltConfig.triggerIndex(p.second));
+    for (int j = m.size()-1; j >= 0; j--)
+      if (m[j].rfind("hltL", 0) == 0 && m[j].rfind("Filtered") != std::string::npos) {
+        filterNameMap.at(p.first) = m[j];
+        break;
+      }
+  }
+
   return;
 }
 
@@ -3756,7 +3780,7 @@ HiOniaAnalyzer::hltReport(const edm::Event &iEvent ,const edm::EventSetup& iSetu
     //! Use HLTConfigProvider
     const unsigned int n= hltConfig.size();
     for (std::map<std::string, unsigned int>::iterator it = mapTriggernameToHLTbit.begin(); it != mapTriggernameToHLTbit.end(); it++) {
-      unsigned int triggerIndex= hltConfig.triggerIndex( it->first );
+      unsigned int triggerIndex= hltConfig.triggerIndex( triggerNameMap.at(it->first) );
       if (it->first == "NoTrigger") continue;
       if (triggerIndex >= n) {
 	if (_checkTrigNames) std::cout << "[HiOniaAnalyzer::hltReport] --- TriggerName " << it->first << " not available in config!" << std::endl;  // Matt
@@ -3791,7 +3815,7 @@ HiOniaAnalyzer::hltReport(const edm::Event &iEvent ,const edm::EventSetup& iSetu
         } else {
           //-------prescale factor------------
           if ( hltPrescaleInit && hltPrescaleProvider.prescaleSet(iEvent,iSetup)>=0 ) {
-            std::pair<std::vector<std::pair<std::string,int> >,int> detailedPrescaleInfo = hltPrescaleProvider.prescaleValuesInDetail(iEvent, iSetup, triggerPathName);
+            std::pair<std::vector<std::pair<std::string,int> >,int> detailedPrescaleInfo = hltPrescaleProvider.prescaleValuesInDetail(iEvent, iSetup, triggerNameMap.at(triggerPathName));
             //get HLT prescale info from hltPrescaleProvider     
             const int hltPrescale = detailedPrescaleInfo.second;
             //get L1 prescale info from hltPrescaleProvider

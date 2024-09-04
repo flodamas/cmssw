@@ -77,19 +77,6 @@ triggerList    = {
         "HLT_HIL3DoubleMu0_v1",
         "HLT_HIL3DoubleMu10_v1",
         ),
-    # Double Muon Filter List
-    'DoubleMuonFilter'  : cms.vstring(
-        "hltL1fL1sDoubleMuOpenL1Filtered0",
-        "hltL1fL1sDoubleMuOpenOSL1Filtered0",
-        "hltL1fL1sDoubleMuOpenSSL1Filtered0",
-        "hltL1fL1sDoubleMu0L1Filtered0",
-        "hltL1fL1sDoubleMu0L1HighQFiltered0",
-        "hltL1fL1sDoubleMu10L1Filtered0",
-        "hltL2fL1sDoubleMu0L1f0L2Filtered0",
-        "hltL2fL1sDoubleMu10L1f0L2Filtered10",
-        "hltL3fL1sDoubleMu0L1f0L2f0L3Filtered0",
-        "hltL3fL1sDoubleMu10L1f0L2f0L3Filtered10",
-        ),
     # Single Muon Trigger List
     'SingleMuonTrigger' : cms.vstring(
         "HLT_HIL1Mu12_v1",
@@ -104,21 +91,6 @@ triggerList    = {
         "HLT_HIL3Mu12_v1",
         "HLT_HIL3Mu15_v1",
         "HLT_HIL3Mu20_v1",
-        ),
-    # Single Muon Filter List
-    'SingleMuonFilter'  : cms.vstring(
-        "hltL1fL1sSingleMu12L1Filtered0",
-        "hltL1fL1sSingleMu16L1Filtered0",
-        "hltL2fL1sSingleMu3OR5L1f0L2Filtered7",
-        "hltL2fL1sSingleMu7L1f0L2Filtered12",
-        "hltL2fL1sSingleMu7L1f0L2Filtered15",
-        "hltL2fL1sSingleMu7L1f0L2Filtered20",
-        "hltL3fL1sSingleMu3L1f0L2f0L3Filtered3",
-        "hltL3fL1sSingleMu3OR5L1f0L2f0L3Filtered5",
-        "hltL3fL1sSingleMu3OR5L1f0L2f0L3Filtered7",
-        "hltL3fL1sSingleMu7L1f0L2f0L3Filtered12",
-        "hltL3fL1sSingleMu7L1f0L2f0L3Filtered15",
-        "hltL3fL1sSingleMu7L1f0L2f0L3Filtered20",
         )
 }
 
@@ -151,7 +123,7 @@ oniaTreeAnalyzer(process,
                  muonSelection=muonSelection, L1Stage=2, isMC=isMC, pdgID=pdgId, outputFileName=options.outputFile, doTrimu=doTrimuons#, OnlySingleMuons=True
 )
 
-process.onia2MuMuPatGlbGlb.dimuonSelection       = cms.string("mass > 20 && charge==0 && abs(daughter('muon1').innerTrack.dz - daughter('muon2').innerTrack.dz) < 25")
+process.onia2MuMuPatGlbGlb.dimuonSelection       = cms.string("mass > 50 && charge==0 && abs(daughter('muon1').innerTrack.dz - daughter('muon2').innerTrack.dz) < 25")
 process.onia2MuMuPatGlbGlb.lowerPuritySelection = cms.string("pt > 10 && abs(eta) < 2.4 && passed('CutBasedIdTight')")
 #process.onia2MuMuPatGlbGlb.lowerPuritySelection  = cms.string("pt > 5 || isPFMuon || (pt>1.2 && (isGlobalMuon || isStandAloneMuon)) || (isTrackerMuon && track.quality('highPurity'))")
 #process.onia2MuMuPatGlbGlb.higherPuritySelection = cms.string("") ## No need to repeat lowerPuritySelection in there, already included

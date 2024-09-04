@@ -69,9 +69,7 @@ def oniaTreeAnalyzer(process, muonTriggerList=[[],[],[],[]], HLTProName='HLT', m
             onlySingleMuons     = cms.bool(OnlySingleMuons),
             histFileName        = cms.string(outputFileName),
             dblTriggerPathNames = muonTriggerList['DoubleMuonTrigger'],
-        dblTriggerFilterNames = muonTriggerList['DoubleMuonFilter'],
         sglTriggerPathNames = muonTriggerList['SingleMuonTrigger'],
-        sglTriggerFilterNames = muonTriggerList['SingleMuonFilter'],
             stageL1Trigger      = cms.uint32(L1Stage)
     )
 

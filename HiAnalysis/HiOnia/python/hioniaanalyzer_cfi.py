@@ -64,17 +64,16 @@ hionia = cms.EDAnalyzer('HiOniaAnalyzer',
                         combineCategories = cms.bool(False),
                         fillRooDataSet = cms.bool(False),
                         fillTree = cms.bool(True),
-                        fillHistos = cms.bool(True),
+                        fillHistos = cms.bool(False),
                         minimumFlag = cms.bool(False),
                         fillSingleMuons = cms.bool(True),
                         onlySingleMuons = cms.bool(False),
                         fillRecoTracks = cms.bool(False),
-                        histFileName = cms.string("Jpsi_Histos.root"),		
+                        histFileName = cms.string("Jpsi_Histos.root"),
                         dataSetName = cms.string("Jpsi_DataSet.root"),
                         
                         #--
                         dblTriggerPathNames    = cms.vstring(),
-                        dblTriggerFilterNames = cms.vstring(),
                         sglTriggerPathNames    = cms.vstring(),
-                        sglTriggerFilterNames = cms.vstring()
+                        stageL1Trigger = cms.uint32(True)
                         )

@@ -9,7 +9,7 @@ from Configuration.StandardSequences.Eras import eras
 HLTProcess     = "HLT" # Name of HLT process
 isMC           = False # if input is MONTECARLO: True or if it's DATA: False
 muonSelection  = "Glb" # Single muon selection: All, Glb(isGlobal), GlbTrk(isGlobal&&isTracker), Trk(isTracker), GlbOrTrk, TwoGlbAmongThree (which requires two isGlobal for a trimuon, and one isGlobal for a dimuon) are available
-applyEventSel  = False # Only apply Event Selection if the required collections are present
+applyEventSel  = True # Only apply Event Selection if the required collections are present
 OnlySoftMuons  = False # Keep only isSoftMuon's (without highPurity, and without isGlobal which should be put in 'muonSelection' parameter) from the beginning of HiSkim. If you want the full SoftMuon selection, set this flag false and add 'isSoftMuon' in lowerPuritySelection. In any case, if applyCuts=True, isSoftMuon is required at HiAnalysis level for muons of selected dimuons.
 applyCuts      = False # At HiAnalysis level, apply kinematic acceptance cuts + identification cuts (isSoftMuon (without highPurity) or isTightMuon, depending on TightGlobalMuon flag) for muons from selected di(tri)muons + hard-coded cuts on the di(tri)muon that you would want to add (but recommended to add everything in LateDimuonSelection, applied at the end of HiSkim)
 SumETvariables = False  # Whether to write out SumET-related variables
@@ -21,7 +21,6 @@ OneMatchedHLTMu = -1   # Keep only di(tri)muons of which the one(two) muon(s) ar
 #############################################################################
 keepExtraColl  = False # General Tracks + Stand Alone Muons + Converted Photon collections
 miniAOD        = True # whether the input file is in miniAOD format (default is AOD)
-miniAOD_muonCuts = False # Apply the cuts used in the muon collections of miniAOD. Only has an effect with AOD.
 UsePropToMuonSt = False # whether to use L1 propagated muons (works only for miniAOD now)
 pdgId = 443 # J/Psi : 443, Y(1S) : 553
 
@@ -75,24 +74,21 @@ triggerList    = {
         ),
     # Single Muon Trigger List
     'SingleMuonTrigger' : cms.vstring(
-      'HLT_IsoMu20_v15',
-    'HLT_IsoMu24_TwoProngs35_v1',
-    'HLT_IsoMu24_eta2p1_v15',
-    'HLT_IsoMu24_v13',
-    'HLT_IsoMu27_v16',
-    'HLT_IsoMu30_v4',
-    'HLT_L1SingleMu18_v3',
-    'HLT_L1SingleMu25_v2',
-    'HLT_L2Mu10_v7',
-    'HLT_L2Mu50_v2',
-    'HLT_Mu12_v3',
-    'HLT_Mu15_v3',
-    'HLT_Mu20_v12',
-    'HLT_Mu27_v13',
-    'HLT_Mu50_v13',
-    'HLT_Mu55_v3',
-    'HLT_OldMu100_v3',
-    'HLT_TkMu100_v2'
+      'HLT_IsoMu20_v',
+    'HLT_IsoMu24_v',
+    'HLT_IsoMu27_v',
+    'HLT_IsoMu30_v',
+    'HLT_L1SingleMu18_v',
+    'HLT_L1SingleMu25_v',
+    'HLT_L2Mu10_v',
+    'HLT_L2Mu50_v',
+    'HLT_Mu12_v',
+    'HLT_Mu15_v',
+    'HLT_Mu20_v',
+    'HLT_Mu27_v',
+    'HLT_Mu50_v',
+    'HLT_Mu55_v',
+    'HLT_TkMu100_v'
         )
 }
 
@@ -125,8 +121,8 @@ oniaTreeAnalyzer(process,
                  muonSelection=muonSelection, L1Stage=2, isMC=isMC, pdgID=pdgId, outputFileName=options.outputFile, doTrimu=doTrimuons#, OnlySingleMuons=True
 )
 
-process.onia2MuMuPatGlbGlb.dimuonSelection       = cms.string("mass > 50 && charge==0 && abs(daughter('muon1').innerTrack.dz - daughter('muon2').innerTrack.dz) < 25")
-process.onia2MuMuPatGlbGlb.lowerPuritySelection = cms.string("pt > 10 && abs(eta) < 2.4 && passed('CutBasedIdTight')")
+process.onia2MuMuPatGlbGlb.dimuonSelection       = cms.string("mass > 50 && charge==0")
+process.onia2MuMuPatGlbGlb.lowerPuritySelection = cms.string("pt > 15 && abs(eta) < 2.4 && passed('CutBasedIdTight')")
 #process.onia2MuMuPatGlbGlb.lowerPuritySelection  = cms.string("pt > 5 || isPFMuon || (pt>1.2 && (isGlobalMuon || isStandAloneMuon)) || (isTrackerMuon && track.quality('highPurity'))")
 #process.onia2MuMuPatGlbGlb.higherPuritySelection = cms.string("") ## No need to repeat lowerPuritySelection in there, already included
 if applyCuts:
@@ -187,23 +183,19 @@ if saveHLT:
   process.oniaTreeAna = cms.Path(process.hltbitanalysis * process.hltobject * process.oniaTreeAna )
 '''
 
-process.NoScraping = cms.EDFilter("FilterOutScraping",
-                          applyfilter = cms.untracked.bool(True),
-                          debugOn = cms.untracked.bool(False),
-                          numtrack = cms.untracked.uint32(10),
-                          thresh = cms.untracked.double(0.25)
-                          )
-
-process.primaryVertexFilter = cms.EDFilter("VertexSelector",
-                                   src = cms.InputTag("offlineSlimmedPrimaryVertices"),
-                                   cut = cms.string("!isFake && abs(z) <= 25 && position.Rho <= 2 && tracksSize >= 2"), 
-                                   filter = cms.bool(True),   # otherwise it won't filter the events
-                                   )
-
 if applyEventSel:
-    # Offline event filters
-    process.oniaTreeAna.replace(process.hionia, process.NoScraping * process.hionia )
 
+  # Offline event filters
+  process.load('HeavyIonsAnalysis.EventAnalysis.collisionEventSelection_cff')
+
+  # HLT trigger firing events
+  import HLTrigger.HLTfilters.hltHighLevel_cfi
+  process.hltHI = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
+  process.hltHI.HLTPaths = ["HLT_Mu*_v*","HLT_*Mu*_v"]
+  process.hltHI.throw = False
+  process.hltHI.andOr = True
+  
+  process.oniaTreeAna.replace(process.patMuonSequence, process.hltHI * process.primaryVertexFilter * process.patMuonSequence )
 
 if atLeastOneCand:
   if doTrimuons:
@@ -221,6 +213,22 @@ process.oniaTreeAna = cms.Path(process.oniaTreeAna)
 if miniAOD:
   from HiSkim.HiOnia2MuMu.onia2MuMuPAT_cff import changeToMiniAOD_pp
   changeToMiniAOD_pp(process)
+
+  process.myMuonSelector = cms.EDFilter("PATMuonSelector",
+    src = cms.InputTag("slimmedMuons"),
+    cut = cms.string("isGlobalMuon && pt > 15. && abs(eta) < 2.4 && passed('CutBasedIdTight')"),
+    filter = cms.bool(True)
+    )
+    
+  process.oniaTreeAna.replace(process.unpackedMuons, process.myMuonSelector * process.unpackedMuons )
+
+  process.unpackedMuons.muonSelectors = cms.vstring([])
+
+  from Configuration.Applications.ConfigBuilder import MassReplaceInputTag
+  process = MassReplaceInputTag(process, "slimmedMuons", "myMuonSelector")
+  process.myMuonSelector.src = cms.InputTag("slimmedMuons")
+
+  
 
 #----------------------------------------------------------------------------
 #Options:

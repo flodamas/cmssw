@@ -57,7 +57,6 @@ options.inputFiles =[
   '/store/hidata/HIRun2018A/HIForward/AOD/04Apr2019-v1/00000/2D3F34A1-D56A-6D4C-84E3-9639A7CA9A87.root',
   '/store/hidata/HIRun2018A/HIForward/AOD/04Apr2019-v1/00000/3A6431A7-24DA-4844-ABAA-C9E44F4B989C.root',
   '/store/hidata/HIRun2018A/HIForward/AOD/04Apr2019-v1/00000/00DB29C1-E3F8-6546-BB32-120BFD2C7FEA.root',
-  '/store/hidata/HIRun2018A/HIForward/AOD/04Apr2019-v1/00000/0F9BA72E-1031-8B4A-9490-70EFD62A6422.root'
 ]
 options.maxEvents = -1 # -1 means all events
 
@@ -79,7 +78,7 @@ triggerList    = {
 if isMC:
   globalTag = '103X_upgrade2018_realistic_HI_v11'
 else:
-  globalTag = 'auto:run2_data'
+  globalTag = '103X_dataRun2_Prompt_fixEcalADCToGeV_v1'
 
 #----------------------------------------------------------------------------
 

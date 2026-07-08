@@ -42,9 +42,15 @@ void TrackAnalyzer::fillVertices(const edm::Event& iEvent) {
 
   iMaxPtSumVtx = -1;
   float maxPtSum = -999;
+  //int nVertices = (int)recoVertices.size();
   nVtx = (int)recoVertices.size();
   for (int i = 0; i < nVtx; ++i) {
     const auto& v = recoVertices[i];
+    /*
+    if (applyTrackSelections_){
+      if(std::abs(v.position().z()) > 15.) continue;
+    }
+    */
     xVtx.push_back(v.position().x());
     yVtx.push_back(v.position().y());
     zVtx.push_back(v.position().z());
@@ -69,6 +75,8 @@ void TrackAnalyzer::fillVertices(const edm::Event& iEvent) {
       iMaxPtSumVtx = i;
       maxPtSum = ptSum;
     }
+
+    //nVtx++;
   }
 }
 
@@ -94,8 +102,6 @@ void TrackAnalyzer::fillTracks(const edm::Event& iEvent, const edm::EventSetup& 
 
     if (applyTrackSelections_){
       if (t.quality(reco::TrackBase::qualityByName("highPurity")) == false) // only high-purity tracks
-	      continue;
-      if (t.ptError() / t.pt() > 0.1) // only tracks with pT resolution better than 10%
 	      continue;
     }
 
@@ -173,15 +179,15 @@ void TrackAnalyzer::beginJob() {
 
   // vertex
   trackTree_->Branch("nVtx", &nVtx);
-  trackTree_->Branch("xVtx", &xVtx);
-  trackTree_->Branch("yVtx", &yVtx);
+  //trackTree_->Branch("xVtx", &xVtx);
+  //trackTree_->Branch("yVtx", &yVtx);
   trackTree_->Branch("zVtx", &zVtx);
-  trackTree_->Branch("xErrVtx", &xErrVtx);
-  trackTree_->Branch("yErrVtx", &yErrVtx);
-  trackTree_->Branch("zErrVtx", &zErrVtx);
+  //trackTree_->Branch("xErrVtx", &xErrVtx);
+  //trackTree_->Branch("yErrVtx", &yErrVtx);
+  //trackTree_->Branch("zErrVtx", &zErrVtx);
   trackTree_->Branch("chi2Vtx", &chi2Vtx);
   trackTree_->Branch("ndofVtx", &ndofVtx);
-  trackTree_->Branch("isFakeVtx", &isFakeVtx);
+  //trackTree_->Branch("isFakeVtx", &isFakeVtx);
   trackTree_->Branch("nTracksVtx", &nTracksVtx);
   trackTree_->Branch("ptSumVtx", &ptSumVtx);
 
@@ -192,16 +198,16 @@ void TrackAnalyzer::beginJob() {
   trackTree_->Branch("trkEta", &trkEta);
   trackTree_->Branch("trkPhi", &trkPhi);
   trackTree_->Branch("trkCharge", &trkCharge);
-  trackTree_->Branch("trkPDGId", &trkPDGId);
+  //trackTree_->Branch("trkPDGId", &trkPDGId);
   trackTree_->Branch("trkNHits", &trkNHits);
   trackTree_->Branch("trkNPixHits", &trkNPixHits);
   trackTree_->Branch("trkNLayers", &trkNLayers);
   trackTree_->Branch("trkNormChi2", &trkNormChi2);
   trackTree_->Branch("highPurity", &highPurity);
 
-  trackTree_->Branch("pfEnergy", &pfEnergy);
-  trackTree_->Branch("pfEcal", &pfEcal);
-  trackTree_->Branch("pfHcal", &pfHcal);
+  //trackTree_->Branch("pfEnergy", &pfEnergy);
+  //trackTree_->Branch("pfEcal", &pfEcal);
+  //trackTree_->Branch("pfHcal", &pfHcal);
 
   trackTree_->Branch("trkAssociatedVtxIndx", &trkAssociatedVtxIndx);
   trackTree_->Branch("trkAssociatedVtxQuality", &trkAssociatedVtxQuality);
@@ -209,11 +215,11 @@ void TrackAnalyzer::beginJob() {
   trackTree_->Branch("trkDzErrAssociatedVtx", &trkDzErrAssociatedVtx);
   trackTree_->Branch("trkDxyAssociatedVtx", &trkDxyAssociatedVtx);
   trackTree_->Branch("trkDxyErrAssociatedVtx", &trkDxyErrAssociatedVtx);
-  trackTree_->Branch("trkFirstVtxQuality", &trkFirstVtxQuality);
-  trackTree_->Branch("trkDzFirstVtx", &trkDzFirstVtx);
-  trackTree_->Branch("trkDzErrFirstVtx", &trkDzErrFirstVtx);
-  trackTree_->Branch("trkDxyFirstVtx", &trkDxyFirstVtx);
-  trackTree_->Branch("trkDxyErrFirstVtx", &trkDxyErrFirstVtx);
+  //trackTree_->Branch("trkFirstVtxQuality", &trkFirstVtxQuality);
+  //trackTree_->Branch("trkDzFirstVtx", &trkDzFirstVtx);
+  //trackTree_->Branch("trkDzErrFirstVtx", &trkDzErrFirstVtx);
+  //trackTree_->Branch("trkDxyFirstVtx", &trkDxyFirstVtx);
+  //trackTree_->Branch("trkDxyErrFirstVtx", &trkDxyErrFirstVtx);
   for (const auto& d : dedxEstimatorsSrc_)
     trackTree_->Branch(d.first.c_str(), &(trkDeDx[d.first]));
 }

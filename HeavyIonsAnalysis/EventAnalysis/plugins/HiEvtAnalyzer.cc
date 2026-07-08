@@ -601,7 +601,7 @@ void HiEvtAnalyzer::beginJob() {
   
   thi_->Branch("hiHF_pf", &hiHF_pf, "hiHF_pf/F");
   thi_->Branch("hiHFE_pf", &hiHFE_pf, "hiHFE_pf/F");
-
+  /*
   thi_->Branch("hiHF_pfha", &hiHF_pfha, "hiHF_pfha/F");
   thi_->Branch("hiHF_pfem", &hiHF_pfem, "hiHF_pfem/F");
   thi_->Branch("hiHFPlus_pf", &hiHFPlus_pf, "hiHFPlus_pf/F");
@@ -613,7 +613,7 @@ void HiEvtAnalyzer::beginJob() {
   thi_->Branch("hiHFEMinus_pf", &hiHFEMinus_pf, "hiHFEMinus_pf/F");
   thi_->Branch("hiHFMinus_pfha", &hiHFMinus_pfha, "hiHFMinus_pfha/F");
   thi_->Branch("hiHFMinus_pfem", &hiHFMinus_pfem, "hiHFMinus_pfem/F");
-
+  */
   for (int i=0; i<NHFLEAD; i++) {
     thi_->Branch(Form("hiHF_pfle%d", i+1), &(hiHF_pfle[i]), Form("hiHF_pfle%d/F", i+1));
     thi_->Branch(Form("hiHFPlus_pfle%d", i+1), &(hiHFPlus_pfle[i]), Form("hiHFPlus_pfle%d/F", i+1));
